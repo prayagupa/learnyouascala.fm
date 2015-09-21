@@ -124,6 +124,45 @@ Unit– Type of method that doesn’t return a value of anys sort.
 * What is `Unit`?
 * What is the difference between a `call-by-value` and `call-by-name` parameter? 
 	* How does Scala's `Stream` trait levarages `call-by-name`?
+```scala
+
+-----------------------------------------------------------------------------------------
+call-by-value version,                        | call-by-name version
+-----------------------------------------------------------------------------------------
+the side-effect of the passed-in function     | the side-effect happened twice.
+call (getEventCount()) only happened once.    |
+------------------------------------------------------------------------------------------
+
+def getEventCount() = {
+  println("calling getEventCount")
+  1 // return value
+}
+
+def callByValue(f: Int) = {
+  println("f1=" + f)
+  println("f2=" + f)
+}
+
+def callByName(f: => Int) = {
+  println("f1=" + f)
+  println("f2=" + f)
+}
+
+//usage
+scala> callByValue(getEventCount())
+calling getEventCount
+f1=1
+f2=1
+
+scala> callByName(getEventCount())
+calling getEventCount
+f1=1
+calling getEventCount
+f2=1
+
+// http://stackoverflow.com/a/17901633/432903
+```
+
 * Define uses for the `Option` monad and good practices it provides.
 ```
 // http://stackoverflow.com/a/25361305/432903
@@ -250,6 +289,24 @@ val oddValues = filter( oddPredicate, candidates )
 * What are benefits of non-blocking (asynchronous I/O) over blocking (synchronous I/O).
 * Do you think that Scala has the same async spirit as Node.js?
 * Explain the difference between `concurrency` and `parallelism`, and name some constructs you can use in Scala to leverage both.
+```
+
+// http://stackoverflow.com/a/29796033/432903
+
+-------------------------------------------------------------------------------------------------------------
+Concurrency                                                   | Parallelism 
+-------------------------------------------------------------------------------------------------------------
+is when two tasks can start, run, and complete                | is when tasks literally run at the same time
+in overlapping time periods.                                  | 
+It doesn't necessarily mean they'll ever both                 | eg. on a multicore processor.
+be running at the same instant.                               |
+Eg. multitasking on a single-core machine.                    |
+                                                              |
+//
+A condition that exists when                                  | condition that arises when at least two threads
+at least two threads are making progress.                     | are executing simultaneously.
+-------------------------------------------------------------------------------------------------------------
+```
 * What is the global ExecutionContext?
   * What does the global ExecutionContext underlay?
 * What is the global ExecutionContext?
@@ -271,3 +328,18 @@ val oddValues = filter( oddPredicate, candidates )
 * What testing framework for Scala do you use?
 * What do you know about property based testing frameworks, such as Scalacheck?
 * Do you like ‘scalaz‘?
+```scala
+// Scala library for functional programming.
+
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.4"
+
+import scalaz._
+import std.option._, std.list._ // functions and type class instances for Option and List
+
+Apply[Option].apply2(some(1), some(2))((a, b) => a + b)   // res0: Option[Int] = Some(3)
+Traverse[List].traverse(List(1, 2, 3))(i => some(i))      // res1: Option[List[Int]] = Some(List(1, 2, 3))
+List(List(1)).join                                        // res0: List[Int] = List(1)
+List(true, false).ifM(List(0, 1), List(2, 3))             // res1: List[Int] = List(0, 1, 2, 3)
+
+```
+
