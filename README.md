@@ -31,10 +31,35 @@ This file contains a number of Scala interview questions that can be used when v
 
 #### Language Questions:
 
-* What is the difference between a `var`, a `val` and `def`?
+* [What is the difference between a `var`, a `val` and `def`?]([http://stackoverflow.com/a/4440614/432903)
+
+```
+There are three ways of defining things in Scala:
+
+def # defines a method
+val # defines a fixed val (which cannot be modified)
+var # defines a variable (which can be modified)
+```
+
 * What is the difference between a `trait` and an `abstract class`?
+```
+-----------------------------------------------------------------------------------------------------------------------------------------------
+abstract class                                                  | trait 
+-----------------------------------------------------------------------------------------------------------------------------------------------
+* can have constructor parameters as well as type parameters.   | * can have only type parameters. There was some discussion that in future even                                                                |   traits can have constructor parameters
+                                                                |
+* are fully interoperable with Java.                            | * Traits are fully interoperable only if they do not contain 
+ You can call them from Java code without any wrappers.         |   any implementation code
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+```
+
 * What is the difference between an `object` and a `class`?
 * What is a `case class`?
+```
+Case classes can be seen as plain and immutable data-holding objects that should exclusively depend on their constructor arguments.
+```
+
 * What is the difference between a Java future and a Scala future?
 * What is the difference between `unapply` and `apply`, when would you use them?
 * What is a companion object?
