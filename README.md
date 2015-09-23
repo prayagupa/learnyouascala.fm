@@ -64,7 +64,7 @@ abstract class                                                  | trait
 Case classes can be seen as plain and immutable data-holding objects that should exclusively depend on their constructor arguments.
 ```
 
-* What is the difference between a Java future and a Scala future?
+* What is the difference between a Java future and a Scala future? (TC, 2015)
 * What is the difference between `unapply` and `apply`, when would you use them?
 
 ```scala
@@ -106,19 +106,25 @@ val service : EventService = new EventService()
 service.creteEvent()
 ```
 
-* What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`?
+* What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? (TC, 2015
 ```scala
 //http://blog.sanaulla.info/2009/07/12/nothingness/
-Null– Its a Trait.
-null–  Its an instance of Null- Similar to Java null.
-
-Nil– Represents an emptry List of anything of zero length. Its not that it refers to nothing but it refers to List which has no contents.
-
-Nothing is a Trait. Its a subtype of everything. But not superclass of anything. There are no instances of Nothing.
-
-None– Used to represent a sensible return value. Just to avoid null pointer exception. Option has exactly 2 subclasses- Some and None. None signifies no result from the method.
-
-Unit– Type of method that doesn’t return a value of anys sort.
+--------------------------------------------------------------------------------------------------------
+Null         | Its a Trait.
+--------------------------------------------------------------------------------------------------------
+null         | Its an instance of Null- Similar to Java null.
+--------------------------------------------------------------------------------------------------------
+Nil          | Represents an emptry List of anything of zero length. 
+             | Its not that it refers to nothing but it refers to List which has no contents.
+--------------------------------------------------------------------------------------------------------
+Nothing      | is a Trait. Its a subtype of everything. But not superclass of anything. 
+             | There are no instances of Nothing.
+--------------------------------------------------------------------------------------------------------
+None         | Used to represent a sensible return value. Just to avoid null pointer exception. 
+             | Option has exactly 2 subclasses- Some and None. None signifies no result from the method.
+--------------------------------------------------------------------------------------------------------
+Unit         | Type of method that doesn’t return a value of anys sort.
+--------------------------------------------------------------------------------------------------------
 ```
 
 * What is `Unit`?
@@ -163,12 +169,17 @@ f2=1
 // http://stackoverflow.com/a/17901633/432903
 ```
 
-* Define uses for the `Option` monad and good practices it provides.
-```
+* Define uses for the `Option` monad and good practices it provides. (TS, 2015)
+
+```scala
+// CT, Maths
+In category theory, a branch of mathematics, a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. Monads are used in the theory of pairs of adjoint functors, and they generalize closure operators on partially ordered sets to arbitrary categories.
+
 // http://stackoverflow.com/a/25361305/432903
+// Scala
 Monad is a concept, an abstract interface if you will, that simply defines a way of composing data.
 
-Option supports composition via flatMap, and that's pretty much everything that is needed to wear the "monad badge".
+Option[] supports composition via .flatMap, and that's pretty much everything that is needed to wear the "monad badge".
 
 From a theoretical point of view, Option should also:
 * support a unit operation (return, in Haskell terms) to create a monad out of a bare value, which in case of Option is the Some constructor
