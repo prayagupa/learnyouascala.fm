@@ -13,12 +13,6 @@ This file contains a number of Scala interview questions that can be used when v
   1. [Coding Questions](#coding-questions)
   1. [Fun Questions](#fun-questions)
 
-## Getting Involved
-
-  1. [Contributors](#contributors)
-  1. [How to Contribute](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/CONTRIBUTING.md)
-  1. [License](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/LICENSE.md)
-
 #### General Questions:
 
 * What did you learn yesterday/this week?
@@ -65,6 +59,56 @@ Case classes can be seen as plain and immutable data-holding objects that should
 ```
 
 * What is the difference between a Java future and a Scala future? (TC, 2015)
+```scala
+//http://stackoverflow.com/a/31368177/432903
+-----------------------------------------------------------------------------------------------------------------
+       java.util.concurrent.Future                        |    scala.concurrent.Future
+-----------------------------------------------------------------------------------------------------------------
+The main inconvenience of java.util.concurrent.Future     | With scala.concurrent.Future you get instead a real 
+is the fact that you can't get the value                  | non-blocking computation  as you can attach callbacks
+without blocking.                                         | for completion (success/failure) or simply map over
+In fact the only way to retrieve                          | it and chain multiple Futures together in a monadic   a value is the get method                                 | fashion.
+-----------------------------------------------------------------------------------------------------------------
+ // http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
+ 							  |
+public static class ItemLoader implements Callable<List>{ |  val clients = 1 until 10 toSeq   
+   private final int clientId;                            |  // start the futures 
+                                                          |  val itemFutures: Seq[Future[Seq[Item]]]=
+  public ItemLoader(int clientId) {    	                  |   clients map { client => 
+     this.clientId = clientId;	                          |     Future { 
+  }                                                       |    new ItemService getItems client }
+                                                          |    }
+  @Override                                               |
+  public List call() throws Exception {                   |
+  ItemService service = new ItemService();                |
+    return service.getItems(clientId);                    |
+  }                                                       |
+ } 						          |
+                                                          |
+//							  |
+List<Integer> clients = ...;				  |       // convert list of futures to future of results 
+int p = 4; //parallelism          		          |       val resultFuture: Future[Seq[Seq[Item]]] = 
+ListeningExecutorService threadPool = 			  |	      Future sequence itemFutures
+MoreExecutors.listeningDecorator(Executors.newWorkStealingPool(p));
+                                                          |       
+// Submit all the futures                                 |       // flatten the result val itemsFuture: 
+List<ListenableFuture<List>> itemFutures = new ArrayList<>();     Future[Seq[Item]] = 
+for (Integer client : clients) {                          |            resultFuture map (_.flatten)
+    ListenableFuture<List> future =                       | 
+        threadPool.submit(new ItemLoader(client));        |       // blocking until all futures are finished, 
+    itemFutures.add(future);                              |       // but wait at most 10 seconds   
+}                                                         |       val items = Await.result(
+                                                          |                     itemsFuture, 10 seconds)
+//                                                        |
+// convert list of futures to future of results           |
+// Futures == com.google.common.util.concurrent.Futures   |
+ListenableFuture<List<List<Item>>> resultFuture = Futures.allAsList(itemFutures);
+                                                          |
+// blocking until finished - we only wait for a single Future to complete
+List<List<Item>> itemResults = resultFuture.get();        |
+-----------------------------------------------------------------------------------------------------------------
+```
+
 * What is the difference between `unapply` and `apply`, when would you use them?
 
 ```scala
@@ -263,7 +307,7 @@ def sum[T](list: List[T])(implicit integral: Integral[T]): T = {
   * What are the `monad` axioms?
   * What Scala data types are, or behave like, monads?
   * What are the basic and optional requirement/s to conform a Monad?
-* Explain higher order functions.
+* Explain Higher Order Functions.
 ```scala
 
 // https://gleichmann.wordpress.com/2010/11/28/high-higher-higher-order-functions/
@@ -282,6 +326,7 @@ val candidates = List( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 )
 val evenValues = filter( evenPredicate, candidates )
 val oddValues = filter( oddPredicate, candidates )
 ```
+
 * What is gained from using immutable objects?
 * What is tail recursion?
   * How does it differentiate from common recursion?
@@ -301,7 +346,6 @@ val oddValues = filter( oddPredicate, candidates )
 * Do you think that Scala has the same async spirit as Node.js?
 * Explain the difference between `concurrency` and `parallelism`, and name some constructs you can use in Scala to leverage both.
 ```
-
 // http://stackoverflow.com/a/29796033/432903
 
 -------------------------------------------------------------------------------------------------------------
@@ -354,3 +398,8 @@ List(true, false).ifM(List(0, 1), List(2, 3))             // res1: List[Int] = L
 
 ```
 
+## Getting Involved
+
+  1. [Contributors](#contributors)
+  1. [How to Contribute](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/CONTRIBUTING.md)
+  1. [License](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/LICENSE.md)
