@@ -53,9 +53,19 @@ abstract class                                                  | trait
 
 * What is the difference between an `object` and a `class`?
 * What is a `case class`?
-
 ```
-Case classes can be seen as plain and immutable data-holding objects that should exclusively depend on their constructor arguments.
+Case classes can be seen as plain and immutable data-holding objects 
+that should exclusively depend on their constructor arguments.
+
+eg. 
+sealed trait Entity
+case class Visitor(var name: String, var geoLocation: String) extends Entity
+ 
+val me = Visitor("Prayag", "IA, USA")
+me.name = "NG" // call to a mutator
+
+* useful for pattern matching, a more powerful relative of the 
+  much-despised switch/case mechanism
 ```
 
 * What is the difference between a Java future and a Scala future? (TC, 2015)
@@ -86,9 +96,9 @@ public static class ItemLoader implements Callable<List>{ |  val clients = 1 unt
  } 						          |
                                                           |
 //							  |
-List<Integer> clients = ...;				  |       // convert list of futures to future of results 
-int p = 4; //parallelism          		          |       val resultFuture: Future[Seq[Seq[Item]]] = 
-ListeningExecutorService threadPool = 			  |	      Future sequence itemFutures
+List<Integer> clients = ...;                              |       // convert list of futures to future of results 
+int p = 4; //parallelism                                  |       val resultFuture: Future[Seq[Seq[Item]]] = 
+ListeningExecutorService threadPool =                     |	      Future sequence itemFutures
 MoreExecutors.listeningDecorator(Executors.newWorkStealingPool(p));
                                                           |       
 // Submit all the futures                                 |       // flatten the result val itemsFuture: 
@@ -150,7 +160,8 @@ val service : EventService = new EventService()
 service.creteEvent()
 ```
 
-* What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? (TC, 2015
+* What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? 
+(TC, 2015, difference between Null and None)
 ```scala
 //http://blog.sanaulla.info/2009/07/12/nothingness/
 --------------------------------------------------------------------------------------------------------
@@ -307,6 +318,22 @@ def sum[T](list: List[T])(implicit integral: Integral[T]): T = {
   * What are the `monad` axioms?
   * What Scala data types are, or behave like, monads?
   * What are the basic and optional requirement/s to conform a Monad?
+
+```
+//https://en.wikipedia.org/wiki/Monad_(functional_programming)
+* In FP, a monad is a structure that represents computations defined as sequences of steps: a type with a monad structure defines what it means to chain operations, or nest functions of that type together. 
+* This allows the programmer to build pipelines that process data in steps, in which each action is decorated with additional processing rules provided by the monad.
+* As such, monads have been described as "programmable semicolons"; a semicolon is the operator used to chain together individual statements in many imperative programming languages, thus the expression implies that extra code will be executed between the statements in the pipeline.
+
+eg, Maybe monad, //https://en.wikipedia.org/wiki/Option_type
+data Maybe x = Just x | Nothing //haskell
+
+io monad, 
+doesFileExist :: FilePath -> IO Bool
+removeFile :: FilePath -> IO ()
+
+```
+
 * Explain Higher Order Functions.
 ```scala
 
