@@ -7,11 +7,11 @@ This file contains a number of Scala interview questions that can be used when v
 ## Table of Contents
 
   1. [General Questions](#general-questions)
-  1. [Language Questions](#language-questions)
-  1. [Functional Programming Questions](#functional-programming-questions)
-  1. [Reactive Programming Questions](#reactive-programming-questions)
-  1. [Coding Questions](#coding-questions)
-  1. [Fun Questions](#fun-questions)
+  2. [Language Questions](#language-questions)
+  3. [Functional Programming Questions](#functional-programming-questions)
+  4. [Reactive Programming Questions](#reactive-programming-questions)
+  5. [Coding Questions](#coding-questions)
+  6. [Fun Questions](#fun-questions)
 
 #### General Questions:
 
@@ -27,37 +27,47 @@ This file contains a number of Scala interview questions that can be used when v
 
 * [What is the difference between a `var`, a `val` and `def`?]([http://stackoverflow.com/a/4440614/432903)
 
-```
-There are three ways of defining things in Scala:
+```scala
+//http://stackoverflow.com/a/4440614/432903
+//There are three ways of defining things in Scala:
 
-def # defines a method
-val # defines a fixed val (which cannot be modified)
-var # defines a variable (which can be modified)
+def = { defines a method }
+val = defines a fixed val (which cannot be modified)
+var = defines a variable (which can be modified)
 ```
 
 * What is the difference between a `trait` and an `abstract class`?
 ```
------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
 abstract class                                                  | trait 
------------------------------------------------------------------------------------------------------------------------------------------------
-* can have constructor parameters as well as type parameters.   | * can have only type parameters. There was some
-                                                                |   discussion that in future even
-                                                                |   traits can have constructor parameters
+------------------------------------------------------------------------------------------------------------------
+* can have constructor parameters as well as type parameters.   | * can have only type parameters. 
+                                                                |   ( There was some discussion 
+                                                                |   that in future even traits can have 
+                                                                |   constructor parameters)
                                                                 |
-* are fully interoperable with Java.                            | * Traits are fully interoperable only if they do
-  You can call them                                             |   not contain any implementation code
-  from Java code without any wrappers.                          |   
------------------------------------------------------------------------------------------------------------------------------------------------
+* are fully interoperable with Java <7.                         | * fully interoperable only if they do
+  ( You can call them                                           |   not contain any implementation code
+  from Java code without any wrappers.)                         |   
+-----------------------------------------------------------------------------------------------------------------
 
+```
+
+* What is a `sealed trait X`?
+```
+//http://stackoverflow.com/a/11203867/432903
+A sealed trait can be extended only in the same file as its declaration.
 ```
 
 * What is the difference between an `object` and a `class`?
 * What is a `case class`?
-```
-Case classes can be seen as plain and immutable data-holding objects 
-that should exclusively depend on their constructor arguments.
+```scala
+// Case classes can be seen as plain and immutable data-holding objects 
+// that should exclusively depend on their constructor arguments.
 
-eg. 
+// eg. 
+// A sealed trait can be extended only in the same file as its declaration.
+
 sealed trait Entity
 case class Visitor(var name: String, var geoLocation: String) extends Entity
  
@@ -68,7 +78,7 @@ me.name = "NG" // call to a mutator
   much-despised switch/case mechanism
 ```
 
-* What is the difference between a Java future and a Scala future? (TC, 2015)
+* What is the difference between a Java `Future` and a Scala `Future` ? (TC, 2015)
 ```scala
 //http://stackoverflow.com/a/31368177/432903
 -----------------------------------------------------------------------------------------------------------------
@@ -81,12 +91,13 @@ In fact the only way to retrieve                          | it and chain multipl
 -----------------------------------------------------------------------------------------------------------------
  // http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
  							  |
-public static class ItemLoader implements Callable<List>{ |  val clients = 1 until 10 toSeq   
+public static class ItemLoader                            |  val clients = 1 until 10 toSeq   
+     implements Callable<List> {                          |
    private final int clientId;                            |  // start the futures 
                                                           |  val itemFutures: Seq[Future[Seq[Item]]]=
   public ItemLoader(int clientId) {    	                  |   clients map { client => 
      this.clientId = clientId;	                          |     Future { 
-  }                                                       |    new ItemService getItems client }
+  }                                                       |        new ItemService getItems client }
                                                           |    }
   @Override                                               |
   public List call() throws Exception {                   |
@@ -126,14 +137,14 @@ List<List<Item>> itemResults = resultFuture.get();        |
 // For regular parameters apply constructs and unapply de-structures:
 
 object Event {
-  def apply(a: A):Event = ... // makes an Event from an A
+  def apply(a: A):Event = ...                // makes an Event from an A
   def unapply(event: Event): Option[A] = ... // retrieve the A from the Event
 }
 val e = Event(a)
 e match { case Event(a) => a } 
 ```
 
-* What is a companion object?
+* What is a companion `object`?
 ```scala
 // http://tutorials.jenkov.com/scala/singleton-and-companion-objects.html
 // Scala classes cannot have static variables or methods. 
@@ -163,23 +174,27 @@ service.creteEvent()
 * What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? 
 (TC, 2015, difference between Null and None)
 ```scala
-//http://blog.sanaulla.info/2009/07/12/nothingness/
+// hierarchy -> http://www.scala-lang.org/old/node/71%3Fsize=preview.html
+// http://blog.sanaulla.info/2009/07/12/nothingness/
+
 --------------------------------------------------------------------------------------------------------
-Null         | Its a Trait.
---------------------------------------------------------------------------------------------------------
-null         | Its an instance of Null- Similar to Java null.
+Null {}      | Its a Trait.
+null         | Its an instance of Null- ( Similar to Java null)
 --------------------------------------------------------------------------------------------------------
 Nil          | Represents an emptry List of anything of zero length. 
              | Its not that it refers to nothing but it refers to List which has no contents.
 --------------------------------------------------------------------------------------------------------
-Nothing      | is a Trait. Its a subtype of everything. But not superclass of anything. 
+Nothing      | is a Trait. 
+             | Its a subtype of everything. But not superclass of anything. 
              | There are no instances of Nothing.
 --------------------------------------------------------------------------------------------------------
-None         | Used to represent a sensible return value. Just to avoid null pointer exception. 
-             | Option has exactly 2 subclasses- Some and None. None signifies no result from the method.
+Some/None    | Used to represent a sensible return value. Just to avoid null pointer exception. 
+             | Option[T] has exactly 2 subclasses- Some and None. 
+             | None signifies no result from the method.
 --------------------------------------------------------------------------------------------------------
 Unit         | Type of method that doesn’t return a value of anys sort.
 --------------------------------------------------------------------------------------------------------
+// http://stackoverflow.com/a/16174738/432903
 ```
 
 * What is `Unit`?
@@ -228,7 +243,8 @@ f2=1
 
 ```scala
 // CT, Maths
-In category theory, a branch of mathematics, a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. Monads are used in the theory of pairs of adjoint functors, and they generalize closure operators on partially ordered sets to arbitrary categories.
+In category theory, a branch of maths, a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. 
+Monads are used in the theory of pairs of adjoint functors, and they generalize closure operators on partially ordered sets to arbitrary categories.
 
 // http://stackoverflow.com/a/25361305/432903
 // Scala
@@ -244,11 +260,11 @@ but this is not strictly enforced by Scala.
 * Monads in scala are a much looser concept that in Haskell, and the approach is more practical. 
 * The only thing monads are relevant for, from a language perspective, is the ability of being used in a for-comprehension.
 
-flatMap is a basic requirement, and you can optionally provide map, withFilter and foreach.
+.flatMap is a basic requirement, and you can optionally provide .map, .withFilter and .foreach.
 
 However, there's no such thing as strict conformance to a Monad typeclass, like in Haskell.
 
-Here's an example: let's define our own monad.
+// Here's an example: let's define our own monad.
 
 class EventMonad[A](value: A) {
   def map[B](f: A => B) = new EventMonad(f(value))
@@ -256,7 +272,7 @@ class EventMonad[A](value: A) {
   override def toString = value.toString
 }
 
-Implementation
+// Implementation
 As you see, we're only implementing map and flatMap (well, and toString as a commodity). Congratulations, we have a monad! Let's try it out:
 
 scala> for {
