@@ -96,6 +96,64 @@ val oddValues = filter( oddPredicate, candidates )
   * How do you ensure that the compiler optimizes the tail recursive function?
 * What is function currying?
 * What are implicit parameters?
+```
+// http://daily-scala.blogspot.com/2010/04/implicit-parameters.html
+// Implicit parameters provide a way to allow parameters of a method to be "found". 
+// This is similar to default parameters at a glance but in fact is a different mechanism for finding the 
+// "default" value.
+
+def pay(implicit userId:Int) = {
+    println(userId)
+    //do db stuffs
+}
+
+implicit val userId=89 //considered during implicit resolution
+
+pay      // will print 89
+pay(19) // explicit overrides implicit
+```
+
 * What are typeclasses?
+```scala
+// http://stackoverflow.com/a/5426131/432903
+
+/**
+A crucial distinction between type-classes and interfaces is that 
+for class A to be a "member" of an interface it must declare so at the site of its own definition. 
+
+By contrast, any type can be added to a type-class at any time, 
+provided you can provide the required definitions, and so the members of a type class 
+at any given time are dependent on the current scope. 
+*/
+
+//yup, it's our friend the monoid, with a different name!
+trait Addable[T] {
+  def zero: T
+  def append(a: T, b: T): T
+}
+
+implicit object IntIsAddable extends Addable[Int] {
+  def zero = 0
+  def append(a: Int, b: Int) = 
+      a + b
+}
+
+implicit object StringIsAddable extends Addable[String] {
+  def zero = ""
+  def append(a: String, b: String) = 
+      a + b
+}
+
+def sum[T](xs: List[T])(implicit addable: Addable[T]) =
+  xs.FoldLeft(addable.zero)(addable.append)
+
+//or the same thing, using context bounds:
+
+def sum[T : Addable](xs: List[T]) = {
+  val addable = implicitly[Addable[T]]
+  xs.FoldLeft(addable.zero)(addable.append)
+}
+```
+
 * What are lenses?
 * What is and which are the uses of: Enumerators, Enumeratees and Iteratee
