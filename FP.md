@@ -156,4 +156,67 @@ def sum[T : Addable](xs: List[T]) = {
 ```
 
 * What are lenses?
+```scala
+
+// problem in nested objects
+case class Person(firstName: String, lastName: String, address: Address)
+case class Address(street: String, city: String, state: String, zipCode: Int)
+
+val person = Person("Prayag", "Upd", Address("1000 N", 
+                                           "FF", 
+                                           "IA", 
+                                           52556))
+
+//update addresss -> zipcode, 52556
+val updatedPerson = person.copy(address = person.address.copy(zipCode = person.address.zipCode + 1))
+
+//Lens
+
+val addressZipCodeLens = Lens(
+    get = (_: Address).zipCode,
+    set = (addr: Address, zipCode: Int) => addr.copy(zipCode = zipCode))
+
+val personAddressLens = Lens(
+    get = (_: Person).address, 
+    set = (p: Person, addr: Address) => p.copy(address = addr))
+    
+// The big deal about lenses is that they are composable. 
+// So they are a bit cumbersome at first, but they keep gaining ground the more you use them. 
+// Also, they are great for testability, since you only need to test individual lenses, and 
+// can take for granted their composition.
+
+```
+
 * What is and which are the uses of: Enumerators, Enumeratees and Iteratee
+```scala
+// http://mandubian.com/2012/08/27/understanding-play2-iteratees-for-normal-humans/
+// http://jsuereth.com/scala/2012/02/29/iteratees.html
+// http://stackoverflow.com/a/10184005/432903
+object Application extends Controller {
+  
+  /** 
+   * A String Enumerator producing a formatted Time message every 100 millis.
+   * A callback enumerator is pure an can be applied on several Iteratee.
+   */
+  lazy val clock: Enumerator[String] = {
+    
+    import java.util._
+    import java.text._
+    
+    val dateFormat = new SimpleDateFormat("HH mm ss")
+    
+    Enumerator.fromCallback { () =>
+      Promise.timeout(Some(dateFormat.format(new Date)), 100 milliseconds)
+    }
+  }
+  
+  def index = Action {
+    Ok(views.html.index())
+  }
+  
+  def liveClock = Action {
+    Ok.stream(clock &> Comet(callback = "parent.clockChanged"))
+  }
+  
+}
+```
