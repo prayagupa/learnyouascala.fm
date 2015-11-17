@@ -1,5 +1,13 @@
 #### Functional Programming Questions:
 
+* How can you make a `List[String]` from a `List[List[String]]`?
+```
+/http://alvinalexander.com/scala/how-to-flatten-list-lists-in-scala-with-flatten-method
+val listOfEvents = List(List(1,2), List(3,4))
+val result = listOfEvents.flatten
+
+```
+
 * What is a `functor`?
 ```scala
 // http://stackoverflow.com/a/8464561/432903
