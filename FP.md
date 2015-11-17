@@ -2,10 +2,15 @@
 
 * How can you make a `List[String]` from a `List[List[String]]`?
 ```
-/http://alvinalexander.com/scala/how-to-flatten-list-lists-in-scala-with-flatten-method
-val listOfEvents = List(List(1,2), List(3,4))
-val result = listOfEvents.flatten
+// http://alvinalexander.com/scala/how-to-flatten-list-lists-in-scala-with-flatten-method
 
+val listOfSiteEvents = List(List(1,2), List(3,4))
+val result = listOfSiteEvents.flatten
+
+// .map/ .sort
+listOfSiteEvents.flatten
+                .map(event => event * 2)
+                .sorted
 ```
 
 * What is a `functor`?
