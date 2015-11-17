@@ -13,7 +13,7 @@ listOfSiteEvents.flatten
                 .sorted
 ```
 
-* What is a `functor`?
+* What is a `Functor[T]`?
 ```scala
 // http://stackoverflow.com/a/8464561/432903
 trait Functor[T[_]]{
@@ -21,7 +21,75 @@ trait Functor[T[_]]{
 }
 
 // that's exactly what a functor is. It transforms a T[A] into a T[B] by applying the fn f.
+
+// haskell -> Box analogy
+// http://learnyouahaskell.com/functors-applicative-functors-and-monoids
+Functor[T]s are things that can be mapped over ( like lists, Maybes, trees, and such). 
+In Haskell, they're described by the typeclass Functor[T], which has only one typeclass method, namely fmap, which has a type of 
+      fmap :: (a -> b) 
+                 -> f a 
+                    -> f b
+      
+It says: 
+* give me a function that takes a and returns b 
+* and box with an a (or several of them) inside it and 
+* I'll give you a box with b (or several of them) inside it. 
+It kind of applies the function to the element inside the box.
+
+Ex.
+object Functorise extends App {
+ 
+  // This is a Functor
+  trait Functor[M[_]] {
+ 
+    /* convert f into a function mapping M[A] to M[B]
+     * eg. if M were List, and f was Int ⇒ String
+     * fmap would yield List[Int] ⇒ List[String]
+     */
+    def fmap[A, B](f: A ⇒ B): M[A] ⇒ M[B]
+  }
+ 
+  /* Here are a couple of examples for Option and List Functors
+   * They are implicit so they can be used below in enrichWithFunctor
+   */
+ 
+  implicit object OptionFunctor extends Functor[Option] {
+    def fmap[A, B](f: A ⇒ B): Option[A]  => Option[B] 
+      = option ⇒ option map f
+  }
+ 
+  implicit object ListFunctor extends Functor[List] {
+    def fmap[A, B](f: A ⇒ B): List[A]  => List[B] 
+      = list ⇒ list map f
+  }
+ 
+  /* enrichWithFunctor is an implicit to enrich any kind with an fmap method.
+   * List, Option and any other Foo[X] can be enriched with the
+   * new method.
+   */
+  implicit def enrichWithFunctor[M[_], A](m: M[A]) = new {
+ 
+    /* fmap requires an implicit functor, whose type is M, to which it
+     * delegates to do the real work
+     */
+    def mapWith[B](f: A ⇒ B)(implicit functor: Functor[M]): M[B] 
+      = functor.fmap(f)(m)
+  }
+ 
+  // some examples
+ 
+  println(List(1, 2) mapWith (_ + 1)) // List(2, 3)
+ 
+  println(some(1) mapWith (_ + 1) mapWith (_ * 3)) // Some(6)
+ 
+  println(none[Int] mapWith (_ + 1)) // None
+ 
+  def some[A](a: A): Option[A] = Some(a)
+  def none[A]: Option[A] = None
+}
+
 ```
+
 
 * What is a `applicative`?
 ```scala
