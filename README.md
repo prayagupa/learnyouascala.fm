@@ -25,7 +25,6 @@ This file contains a number of Scala interview questions that can be used when v
 
 #### Coding Questions:
 
-* How can you make a `List[String]` from a `List[List[String]]`?
 * What is the difference (if any) between these 2 statements? 
 ```scala
   var x = immutable.Set[Int]()
