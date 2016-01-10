@@ -14,12 +14,13 @@ var = defines a variable (which can be modified)
 * What is the difference between a `trait` and an `abstract class`?
 ```
 ------------------------------------------------------------------------------------------------------------------
-abstract class                                                  | trait 
+abstract class ConveyableItem [T]                               | trait Conveyable[T]
 ------------------------------------------------------------------------------------------------------------------
-* can have constructor parameters as well as type parameters.   | * can have only type parameters. 
-                                                                |   ( There was some discussion 
+* can have constructor params as well as (bounded)type params.  | * can have only type params. 
+  // bounds in scala                                            |   // https://docs.oracle.com/javase/tutorial/java/generics/bounded.html
+                                                                    ( There was some discussion 
                                                                 |   that in future even traits can have 
-                                                                |   constructor parameters)
+                                                                |   constructor params - ?how can trait have constructor?)
                                                                 |
 * are fully interoperable with Java <7.                         | * fully interoperable only if they do
   ( You can call them                                           |   not contain any implementation code
@@ -38,10 +39,9 @@ A sealed trait can be extended only in the same file as its declaration.
 * What is a `case class`?
 ```scala
 // Case classes can be seen as plain and immutable data-holding objects 
-// that should exclusively depend on their constructor arguments.
+// that should exclusively depend on their constructor args.
 
-// eg. 
-// A sealed trait can be extended only in the same file as its declaration.
+// eg.
 
 sealed trait Entity
 case class Visitor(var name: String, var geoLocation: String) extends Entity
@@ -53,18 +53,19 @@ me.name = "NG" // call to a mutator
   much-despised switch/case mechanism
 ```
 
-* What is the difference between a Java `Future` and a Scala `Future` ? (TC, 2015)
+* What is the difference between a Java `Future` and a Scala `Future` ? (TeachS, 2015)
 ```scala
-//http://stackoverflow.com/a/31368177/432903
+//[What are the differences between a Scala Future and a Java Future](http://stackoverflow.com/a/31368177/432903)
 -----------------------------------------------------------------------------------------------------------------
        java.util.concurrent.Future                        |    scala.concurrent.Future
 -----------------------------------------------------------------------------------------------------------------
 The main inconvenience of java.util.concurrent.Future     | With scala.concurrent.Future you get instead a real 
-is the fact that you can't get the value                  | non-blocking computation  as you can attach callbacks
-without blocking.                                         | for completion (success/failure) or simply map over
-In fact the only way to retrieve                          | it and chain multiple Futures together in a monadic   a value is the get method                                 | fashion.
+is the fact that you can't get the value                  | non-blocking computation as you can attach callbacks
+without blocking.                                         | for completion (.success/.failure) or simply .map() over
+In fact the only way to retrieve the val the get()        | it and chain multiple Futures together in a Monadic  
+method                                                    | fashion.
 -----------------------------------------------------------------------------------------------------------------
- // http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
+// http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
  							  |
 public static class ItemLoader                            |  val clients = 1 until 10 toSeq   
      implements Callable<List> {                          |
@@ -76,8 +77,8 @@ public static class ItemLoader                            |  val clients = 1 unt
                                                           |    }
   @Override                                               |
   public List call() throws Exception {                   |
-  ItemService service = new ItemService();                |
-    return service.getItems(clientId);                    |
+     ItemService service = new ItemService();             |
+     return service.getItems(clientId);                   |
   }                                                       |
  } 						          |
                                                           |
@@ -98,9 +99,11 @@ for (Integer client : clients) {                          |            resultFut
 //                                                        |
 // convert list of futures to future of results           |
 // Futures == com.google.common.util.concurrent.Futures   |
-ListenableFuture<List<List<Item>>> resultFuture = Futures.allAsList(itemFutures);
+ListenableFuture<List<List<Item>>> resultFuture =         |
+        Futures.allAsList(itemFutures);                   |
                                                           |
-// blocking until finished - we only wait for a single Future to complete
+// blocking until finished - we only wait for a single    |
+// Future to complete                                     |
 List<List<Item>> itemResults = resultFuture.get();        |
 -----------------------------------------------------------------------------------------------------------------
 ```
@@ -141,13 +144,13 @@ object EventService {
     }
 }
 
-//usage
+//companion usage
 val service : EventService = new EventService()
 service.creteEvent()
 ```
 
 * What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? 
-(TC, 2015, difference between Null and None)
+(TeachS, 2015, difference between Null and None)
 ```scala
 // hierarchy -> http://www.scala-lang.org/old/node/71%3Fsize=preview.html
 // http://blog.sanaulla.info/2009/07/12/nothingness/
@@ -177,57 +180,50 @@ Unit         | Type of method that doesn’t return a value of anys sort.
 	* How does Scala's `Stream` trait levarages `call-by-name`?
 ```scala
 
------------------------------------------------------------------------------------------
-call-by-value version,                        | call-by-name version
------------------------------------------------------------------------------------------
-the side-effect of the passed-in function     | the side-effect happened twice.
-call (getEventCount()) only happened once.    |
-------------------------------------------------------------------------------------------
-
 def getEventCount() = {
   println("calling getEventCount")
   1 // return value
 }
 
-def callByValue(f: Int) = {
-  println("f1=" + f)
-  println("f2=" + f)
-}
+-----------------------------------------------------------------------------------------
+call-by-value version,                        | call-by-name version
+-----------------------------------------------------------------------------------------
+                                              |
+def callByExecutedValue(f: Int) = {           | def callByFunctionName(f: => Int) = {
+  println("f1=" + f)                          |   println("f1=" + f)
+  println("f2=" + f)                          |   println("f2=" + f)
+}                                             | }
+                                              |
+//usage                                       | 
+scala> callByExecutedValue(getEventCount())   | scala> callByFunctionName(getEventCount())
+calling getEventCount                         | calling getEventCount
+f1=1                                          | f1=1
+f2=1                                          | calling getEventCount
+                                              | f2=1
+                                              |
+------------------------------------------------------------------------------------------
+the side-effect of the passed-in function     | the side-effect happened twice.
+call (getEventCount()) only happened once.    |
+------------------------------------------------------------------------------------------
 
-def callByName(f: => Int) = {
-  println("f1=" + f)
-  println("f2=" + f)
-}
+//[Call by name vs call by value in Scala, clarification needed](http://stackoverflow.com/a/17901633/432903)
 
-//usage
-scala> callByValue(getEventCount())
-calling getEventCount
-f1=1
-f2=1
-
-scala> callByName(getEventCount())
-calling getEventCount
-f1=1
-calling getEventCount
-f2=1
-
-// http://stackoverflow.com/a/17901633/432903
 ```
 
-* Define uses for the `Option` monad and good practices it provides. (TS, 2015)
+* Define uses for the `Option` monad and good practices it provides. (TeachS, 2015)
 
 ```scala
 // CT, Maths
 In category theory, a branch of maths, a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. 
 Monads are used in the theory of pairs of adjoint functors, and they generalize closure operators on partially ordered sets to arbitrary categories.
 
-// http://stackoverflow.com/a/25361305/432903
+// [What exactly makes Option a monad in Scala?](http://stackoverflow.com/a/25361305/432903)
 // Scala
 Monad is a concept, an abstract interface if you will, that simply defines a way of composing data.
 
 Option[] supports composition via .flatMap, and that's pretty much everything that is needed to wear the "monad badge".
 
-From a theoretical point of view, Option should also:
+From a theoretical point of view, Option[] should also:
 * support a unit operation (return, in Haskell terms) to create a monad out of a bare value, which in case of Option is the Some constructor
 * respect the monadic laws
 but this is not strictly enforced by Scala.
@@ -238,7 +234,9 @@ but this is not strictly enforced by Scala.
 .flatMap is a basic requirement, and you can optionally provide .map, .withFilter and .foreach.
 
 However, there's no such thing as strict conformance to a Monad typeclass, like in Haskell.
+```
 
+```scala
 // Here's an example: let's define our own monad.
 
 class EventMonad[A](value: A) {
@@ -282,14 +280,20 @@ for(x <- c; y = ...) yield {...}              | c.map(x => (x, ...)).map((x,y) =
 
 * Explain the implicit parameter precedence.
 ```
-// http://stackoverflow.com/a/5598107/432903
+// [Where does Scala look for implicits?](http://stackoverflow.com/a/5598107/432903)
 // Implicits in Scala refers to either a value that can be passed "automatically", so to speak, or a conversion 
 // from one type to another that is made automatically.
+```
 
-Implicit Conversion - "abc".map(_.toInt)
-Implicit Parameters - def foo[T](t: T)(implicit integral: Integral[T]) {println(integral)}
+```scala
+Implicit Conversion - "anyString".map(_.toInt)
+
+Implicit Parameters - def anyMethod[T](t: T)(implicit integral: Integral[T]) { 
+                                println(integral)
+                      }
 View Bounds         - def getIndex[T, CC](seq: CC, value: T)(implicit conv: CC => Seq[T]) = seq.indexOf(value)
-                      getIndex("abc", 'a')
+                      getIndex("anyString", 'a')
+                      
 Context Bounds      - 
 def sum[T](list: List[T])(implicit integral: Integral[T]): T = {
     import integral._   // get the implicits in question into scope
@@ -297,6 +301,31 @@ def sum[T](list: List[T])(implicit integral: Integral[T]): T = {
 }
 ```
 
-* Streams:
-	* What consideration you need to have when you use Scala's `Streams`? 
-	* What technique does the Scala's `Streams` use internally?
+Streams:
+--------------
+
+[Akka Stream and HTTP Experimental(http://doc.akka.io/docs/akka-stream-and-http-experimental/1.0-M2/AkkaStreamAndHTTPScala.pdf)
+
+* What consideration you need to have when you use Scala's `Streams`? 
+```
+[Use-cases for Streams in Scala](stackoverflow.com/questions/2096876/use-cases-for-streams-in-scala)
+
+immutable.Stream is to Iterator as immutable.List is to mutable.List. 
+
+Favouring immutability prevents a class of bugs, occasionally at the cost of performance.
+```
+
+```scala
+val streamOfInts = Stream.from(1)
+
+streamOfInts.filter(_ % 5 == 0)
+            .take(10)
+            .toList
+
+//output
+  List(5, 10, 15, 20, 25, 30, 35, 40, 45, 50)
+
+```
+
+* What technique does the Scala's `Streams` use internally?
+
