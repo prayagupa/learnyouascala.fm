@@ -13,12 +13,12 @@ listOfSiteEvents.flatten
                 .sorted
 ```
 
-* What is a `Functor[T]`?
+* What is a `Functor[T]`? (covariant contravariant, exponential, applicative, monad, co-monad)
 ```scala
 // http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
 // [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
 
-Functor transforms a T[A] into a T[B] by applying the fn f.
+Functor transforms a T[A] into a T[B] by applying the fn func.
 // covariant functor
 trait Functor[T[_]]{
   def fMap[A, B](func : A => B)(ta:T[A]) : T[B]
@@ -48,7 +48,7 @@ It kind of applies the function to the element inside the box.
 
 object Functorise extends App {
  
-  // This is a Functor
+  // This is a Variant Functor
   trait Functor[M[_]] {
  
     /* convert f into a function mapping M[A] to M[B]
@@ -105,33 +105,45 @@ object Functorise extends App {
 
 
 * What is a `applicative`?
-```scala
+```
 // Functor[T] allow us to apply fns to things in a context. 
-// But what if the fns we want to apply are already in a context? 
+```
+
+But, what if the fns we want to apply are already in a context? 
+
+```scala
 // (And is pretty easy to end in that situation if you have fns that take more than 
 // one parameter).
 
-// Now we need something like a Functor but that also takes functions already in the context and applies them to  // elements in the context. And that's what the applicative functor is. Here is the signature:
+// Now we need something like a Functor but that also takes functions already in the context and applies them to  // elements in the context. And that's what the applicative functor is. 
+
+// Here is the signature:
 
 trait Applicative[T[_]] extends Functor[T]{
-  def pure[A](a:A):T[A]
-  def <*>[A,B](tf:T[A=>B])(ta:T[A]):T[B]
+  def pure[A](a:A) : T[A]
+  def <*>[A,B](tf:T[A => B])(ta:T[A]) : T[B]
 }
+```
 
-//
-// So far so good. 
+So far so good. what if now you have a function that puts things in the context? 
+
+```
 // Now comes the monads: 
-// what if now you have a function that puts things in the context? 
-// It's signature will be g:X=>M[X] ... you can't use a functor because it expects X=>Y 
-// so we'll end with M[M[X]], you can't use the applicative functor because is expecting the fn already in the 
-// context M[X=>Y] .
 
-// So we use a monad, that takes a fn X=>M[X] and something already in the context M[A] and applies the fn 
+// It's signature will be g:X => M[X] ... you can't use a functor because it expects X => Y 
+// so we'll end with M[M[X]], you can't use the applicative functor because is expecting the fn already in the 
+// context M[X => Y] .
+
+// So we use a monad, that takes a fn X => M[X] and something already in the context M[A] and applies the fn 
 // to what's inside the context, packing the result in only one context. 
-// The signature is:
+```
+
+```scala
+// The signature is: 
+// defines the operation commonly known as bind, flatMap or =<<.
 
 trait Monad[M[_]] extends Applicative[M]{
-  def >>=[A,B](ma:M[A])(f:A=>M[B]):M[B]
+  def >>= [A, B](ma : M[A])(f : A => M[B]) : M[B]
 }
 ```
 
@@ -145,7 +157,9 @@ trait Monad[M[_]] extends Applicative[M]{
 * In FP, a monad is a structure that represents computations defined as sequences of steps: a type with a monad structure defines what it means to chain operations, or nest functions of that type together. 
 * This allows the programmer to build pipelines that process data in steps, in which each action is decorated with additional processing rules provided by the monad.
 * As such, monads have been described as "programmable semicolons"; a semicolon is the operator used to chain together individual statements in many imperative programming languages, thus the expression implies that extra code will be executed between the statements in the pipeline.
+```
 
+```
 eg, Maybe monad, //https://en.wikipedia.org/wiki/Option_type
 data Maybe x = Just x | Nothing //in haskell
 
