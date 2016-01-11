@@ -1,7 +1,7 @@
 #### Functional Programming Questions:
 
 * How can you make a `List[String]` from a `List[List[String]]`?
-```
+```scala
 // http://alvinalexander.com/scala/how-to-flatten-list-lists-in-scala-with-flatten-method
 
 val listOfSiteEvents = List(List(1,2), List(3,4))
@@ -15,13 +15,18 @@ listOfSiteEvents.flatten
 
 * What is a `Functor[T]`?
 ```scala
-// http://stackoverflow.com/a/8464561/432903
+// http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
+// [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
+
+Functor transforms a T[A] into a T[B] by applying the fn f.
+// covariant functor
 trait Functor[T[_]]{
-  def fMap[A,B](f:A=>B)(ta:T[A]):T[B]
+  def fMap[A, B](func : A => B)(ta:T[A]) : T[B]
 }
+// that's exactly what a functor is.
+```
 
-// that's exactly what a functor is. It transforms a T[A] into a T[B] by applying the fn f.
-
+```
 // haskell -> Box analogy
 // http://learnyouahaskell.com/functors-applicative-functors-and-monoids
 Functor[T]s are things that can be mapped over ( like lists, Maybes, trees, and such). 
@@ -35,14 +40,19 @@ It says:
 * and box with an a (or several of them) inside it and 
 * I'll give you a box with b (or several of them) inside it. 
 It kind of applies the function to the element inside the box.
+```
 
-Ex.
+```scala
+
+// Ex. http://www.casualmiracles.com/2012/01/08/a-small-functor-example/
+
 object Functorise extends App {
  
   // This is a Functor
   trait Functor[M[_]] {
  
     /* convert f into a function mapping M[A] to M[B]
+     * 
      * eg. if M were List, and f was Int ⇒ String
      * fmap would yield List[Int] ⇒ List[String]
      */
@@ -53,36 +63,39 @@ object Functorise extends App {
    * They are implicit so they can be used below in enrichWithFunctor
    */
  
-  implicit object OptionFunctor extends Functor[Option] {
-    def fmap[A, B](f: A ⇒ B): Option[A]  => Option[B] 
-      = option ⇒ option map f
+  implicit 
+  object OptionFunctor extends Functor[Option] {
+    def fmap[A, B](f: A => B): Option[A] => Option[B] 
+      = option => option map f
   }
  
-  implicit object ListFunctor extends Functor[List] {
-    def fmap[A, B](f: A ⇒ B): List[A]  => List[B] 
-      = list ⇒ list map f
+  implicit 
+  object ListFunctor extends Functor[List] {
+    def fmap[A, B](f: A => B): List[A]  => List[B] 
+      = list => list map f
   }
  
   /* enrichWithFunctor is an implicit to enrich any kind with an fmap method.
    * List, Option and any other Foo[X] can be enriched with the
    * new method.
    */
-  implicit def enrichWithFunctor[M[_], A](m: M[A]) = new {
+  implicit 
+  def enrichWithFunctor[M[_], A](m: M[A]) = new {
  
     /* fmap requires an implicit functor, whose type is M, to which it
      * delegates to do the real work
      */
-    def mapWith[B](f: A ⇒ B)(implicit functor: Functor[M]): M[B] 
-      = functor.fmap(f)(m)
+    def mapWith[B](f: A => B)(implicit functor: Functor[M]): M[B] 
+      = functor.fmap(f)(m)// calls OptionFunctor or ListFunctor
   }
  
-  // some examples
+  // usage
  
-  println(List(1, 2) mapWith (_ + 1)) // List(2, 3)
+  println(List(2, 8) mapWith (_ + 1))              // List(3, 9)
  
   println(some(1) mapWith (_ + 1) mapWith (_ * 3)) // Some(6)
  
-  println(none[Int] mapWith (_ + 1)) // None
+  println(none[Int] mapWith (_ + 1))               // None
  
   def some[A](a: A): Option[A] = Some(a)
   def none[A]: Option[A] = None
@@ -195,8 +208,8 @@ pay(19) // explicit overrides implicit
 ```
 
 * What are typeclasses?
-```scala
-// http://stackoverflow.com/a/5426131/432903
+```
+// [What are type classes in Scala useful for?](http://stackoverflow.com/a/5426131/432903)
 
 /**
 A crucial distinction between type-classes and interfaces is that 
@@ -206,10 +219,12 @@ By contrast, any type can be added to a type-class at any time,
 provided you can provide the required definitions, and so the members of a type class 
 at any given time are dependent on the current scope. 
 */
+```
 
+```scala
 //yup, it's our friend the monoid, with a different name!
 trait Addable[T] {
-  def zero: T
+  def zero: T //identity monad
   def append(a: T, b: T): T
 }
 
