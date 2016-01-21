@@ -13,19 +13,20 @@ var = defines a variable (which can be modified)
 
 * What is the difference between a `trait` and an `abstract class`?
 ```
-------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 abstract class ConveyableItem [T]                               | trait Conveyable[T]
-------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 * can have constructor params as well as (bounded)type params.  | * can have only type params. 
   // bounds in scala                                            |   // https://docs.oracle.com/javase/tutorial/java/generics/bounded.html
-                                                                    ( There was some discussion 
-                                                                |   that in future even traits can have 
-                                                                |   constructor params - ?how can trait have constructor?)
+                                                                |   ( There was some discussion  
+* abstract class ConveyableItem(val itemId: Int,                |     that in future even traits can have 
+                                val name: String,               |     constructor params. HOW can trait have constructor?)
+                                val weight: T)                  |   
                                                                 |
 * are fully interoperable with Java <7.                         | * fully interoperable only if they do
   ( You can call them                                           |   not contain any implementation code
   from Java code without any wrappers.)                         |   
------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 
 ```
 
@@ -54,6 +55,7 @@ me.name = "NG" // call to a mutator
 ```
 
 * What is the difference between a Java `Future` and a Scala `Future` ? (TeachS, 2015)
+
 ```scala
 //[What are the differences between a Scala Future and a Java Future](http://stackoverflow.com/a/31368177/432903)
 -----------------------------------------------------------------------------------------------------------------
