@@ -16,8 +16,11 @@ var = defines a variable (which can be modified)
 --------------------------------------------------------------------------------------------------------------------------
 abstract class ConveyableItem [T]                               | trait Conveyable[T]
 --------------------------------------------------------------------------------------------------------------------------
-* can have constructor params as well as (bounded)type params.  | * can have only type params. 
-  // bounds in scala                                            |   // https://docs.oracle.com/javase/tutorial/java/generics/bounded.html
+* can have type params(bounded) -> AbstractList[T]              | * can have only type params -> Generics[T]/ first-order types
+           constructor params ->fns that construct other types  | //https://docs.oracle.com/javase/tutorial/java/generics/bounded.html
+//http://www.hydrocodedesign.com/2014/04/02/higher-kinded-types/| 
+// see bounds in scala for type params                          |
+// Int, String, Boolean -> proper types                         |
                                                                 |   ( There was some discussion  
 * abstract class ConveyableItem(val itemId: Int,                |     that in future even traits can have 
                                 val name: String,               |     constructor params. HOW can trait have constructor?)
@@ -331,3 +334,7 @@ streamOfInts.filter(_ % 5 == 0)
 
 * What technique does the Scala's `Streams` use internally?
 
+Generics
+-----------
+
+http://debasishg.blogspot.com/2009/01/higher-order-abstractions-in-scala-with.html
