@@ -205,10 +205,12 @@ calling getEventCount                         | calling getEventCount
 f1=1                                          | f1=1
 f2=1                                          | calling getEventCount
                                               | f2=1
-                                              |
+                                              | 
 ------------------------------------------------------------------------------------------
 the side-effect of the passed-in function     | the side-effect happened twice.
 call (getEventCount()) only happened once.    |
+------------------------------------------------------------------------------------------
+                                              | The motivation for this feature is to construct syntactically natural DSLs —                                               | new control constructs in particular can be made to look much like native                                                 | language features. (http://twitter.github.io/effectivescala/#Functional programming-Call by name)
 ------------------------------------------------------------------------------------------
 
 //[Call by name vs call by value in Scala, clarification needed](http://stackoverflow.com/a/17901633/432903)
