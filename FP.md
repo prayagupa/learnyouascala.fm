@@ -17,7 +17,7 @@ listOfSiteEvents.flatten
 ```scala
 
 // scalaz, http://eed3si9n.com/learning-scalaz/Functor.html
-things that can be mapped over
+things/collections(eg. List) that can be mapped over
 
 // http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
 // [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
@@ -116,12 +116,33 @@ object Functorise extends App {
 
 * What is a `applicative`?
 ```
+Background
+-------------
 * Functor[T] allow us to apply fns to things in a context. 
-* defines the operation commonly known as apply or <*>.
 
-* So far, when we were mapping fn over functors, we usually mapped fns that take only one parameter. 
+* So far, 
+when we were mapping fn over functors, we usually mapped fns that take only one parameter. 
 But, 
 what happens when we map a fn like *, which takes 2 parameters, over a functor?
+```
+
+But, what if the fns we want to apply are already in a context? 
+
+```scala
+And is pretty easy to end in that situation if you have fns that take > 1 parameter.
+
+//solution
+Now we need something like a Functor[] but that also takes functions already in the context and applies them to  
+elements in the context. And that's what the applicative functor is. 
+
+* Applicative defines the operation commonly known as apply or <*>.
+
+// Here is the signature:
+
+trait Applicative[T[_]] extends Functor[T]{
+  def pure[A](a:A) : T[A]
+  def <*>[A,B](tf:T[A => B])(ta:T[A]) : T[B]
+}
 
 eg. 
 val res = List(1, 2, 3, 4) map {
@@ -132,25 +153,19 @@ res map {_(9)}
 
 output:
 List[Int] = List(9, 18, 27, 36)
+
+// List (actually the list type constructor, []) is applicative functor. 
+// What a surprise!
+List(1, 2, 3) <*> List((_: Int) * 0, (_: Int) + 100, (x: Int) => x * x)
+
+val f = Apply[Option].lift2(
+         (_: Int) :: (_: List[Int])
+        )
+f(3.some, List(4).some)
 ```
 
-But, what if the fns we want to apply are already in a context? 
-
-```scala
-// (And is pretty easy to end in that situation if you have fns that take more than 
-// one parameter).
-
-// Now we need something like a Functor[] but that also takes functions already in the context and applies them to  // elements in the context. And that's what the applicative functor is. 
-
-// Here is the signature:
-
-trait Applicative[T[_]] extends Functor[T]{
-  def pure[A](a:A) : T[A]
-  def <*>[A,B](tf:T[A => B])(ta:T[A]) : T[B]
-}
-```
-
-So far so good. what if now you have a function that puts things in the context? 
+<h2>So far so good.</h2> 
+What if now you have a function that puts things in the context? 
 
 ```
 // Now comes the monads: 
