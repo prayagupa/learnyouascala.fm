@@ -13,13 +13,18 @@ listOfSiteEvents.flatten
                 .sorted
 ```
 
-* What is a `Functor[T]`? (covariant contravariant, exponential, applicative, monad, co-monad)
+* What is a `Functor[T]`? (covariant[+] contravariant[-], exponential, applicative, monad, co-monad)
 ```scala
+
+// scalaz, http://eed3si9n.com/learning-scalaz/Functor.html
+things that can be mapped over
+
 // http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
 // [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
 
 Functor transforms a T[A] into a T[B] by applying the fn func.
 // covariant functor
+// covariant functors —> defines the op map or fMap.
 trait Functor[T[_]]{
   def fMap[A, B](func : A => B)(ta:T[A]) : T[B]
 }
@@ -29,7 +34,9 @@ trait Functor[T[_]]{
 ```
 // haskell -> Box analogy
 // http://learnyouahaskell.com/functors-applicative-functors-and-monoids
-Functor[T]s are things that can be mapped over ( like lists, Maybes, trees, and such). 
+
+Functor[T]s are things that can be mapped over ( like List[T], Maybe[T], Tree[T], and such).
+
 In Haskell, they're described by the typeclass Functor[T], which has only one typeclass method, namely fmap, which has a type of 
       fmap :: (a -> b) 
                  -> f a 
@@ -39,6 +46,7 @@ It says:
 * give me a function that takes a and returns b 
 * and box with an a (or several of them) inside it and 
 * I'll give you a box with b (or several of them) inside it. 
+
 It kind of applies the function to the element inside the box.
 ```
 
@@ -53,10 +61,12 @@ object Functorise extends App {
  
     /* convert f into a function mapping M[A] to M[B]
      * 
-     * eg. if M were List, and f was Int ⇒ String
-     * fmap would yield List[Int] ⇒ List[String]
+     * eg. if M were List, and f was (Int => String)
+     * fMap would yield (List[Int] => List[String])
      */
-    def fmap[A, B](f: A ⇒ B): M[A] ⇒ M[B]
+    def fMap[A, B]
+                  (f: A => B): M[A] => 
+                                      M[B]
   }
  
   /* Here are a couple of examples for Option and List Functors
@@ -65,28 +75,28 @@ object Functorise extends App {
  
   implicit 
   object OptionFunctor extends Functor[Option] {
-    def fmap[A, B](f: A => B): Option[A] => Option[B] 
+    def fMap[A, B](f: A => B): Option[A] => Option[B] 
       = option => option map f
   }
  
   implicit 
   object ListFunctor extends Functor[List] {
-    def fmap[A, B](f: A => B): List[A]  => List[B] 
+    def fMap[A, B](f: A => B): List[A]  => List[B] 
       = list => list map f
   }
  
-  /* enrichWithFunctor is an implicit to enrich any kind with an fmap method.
+  /* enrichWithFunctor is an implicit to enrich any kind with an fMap method.
    * List, Option and any other Foo[X] can be enriched with the
    * new method.
    */
   implicit 
-  def enrichWithFunctor[M[_], A](m: M[A]) = new {
+  def enrichWithFunctor[M[_], A](implicitTypeMDelegator: M[A]) = new {
  
-    /* fmap requires an implicit functor, whose type is M, to which it
+    /* fMap requires an implicit functor, whose type is M, to which it
      * delegates to do the real work
      */
-    def mapWith[B](f: A => B)(implicit functor: Functor[M]): M[B] 
-      = functor.fmap(f)(m)// calls OptionFunctor or ListFunctor
+    def mapWith[B](func: A => B)(implicit functor: Functor[M]): M[B] 
+      = functor.fMap(func)(implicitTypeMDelegator)// calls OptionFunctor.fMap or ListFunctor.fMap
   }
  
   // usage
@@ -106,7 +116,22 @@ object Functorise extends App {
 
 * What is a `applicative`?
 ```
-// Functor[T] allow us to apply fns to things in a context. 
+* Functor[T] allow us to apply fns to things in a context. 
+* defines the operation commonly known as apply or <*>.
+
+* So far, when we were mapping fn over functors, we usually mapped fns that take only one parameter. 
+But, 
+what happens when we map a fn like *, which takes 2 parameters, over a functor?
+
+eg. 
+val res = List(1, 2, 3, 4) map {
+                 (_: Int) * (_:Int)
+          }.curried
+          
+res map {_(9)}
+
+output:
+List[Int] = List(9, 18, 27, 36)
 ```
 
 But, what if the fns we want to apply are already in a context? 
@@ -115,7 +140,7 @@ But, what if the fns we want to apply are already in a context?
 // (And is pretty easy to end in that situation if you have fns that take more than 
 // one parameter).
 
-// Now we need something like a Functor but that also takes functions already in the context and applies them to  // elements in the context. And that's what the applicative functor is. 
+// Now we need something like a Functor[] but that also takes functions already in the context and applies them to  // elements in the context. And that's what the applicative functor is. 
 
 // Here is the signature:
 
