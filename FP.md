@@ -13,22 +13,66 @@ listOfSiteEvents.flatten
                 .sorted
 ```
 
+* What are typeclasses?
+```
+// [What are type classes in Scala useful for?](http://stackoverflow.com/a/5426131/432903)
+
+/**
+A crucial distinction between type-classes and interfaces is that 
+for class A to be a "member" of an interface it must declare so at the site of its own definition. 
+
+By contrast, any type can be added to a type-class at any time, 
+provided you can provide the required definitions, and so the members of a type class 
+at any given time are dependent on the current scope. 
+*/
+```
+
+```scala
+//yup, it's our friend the monoid, with a different name!
+trait Addable[T] {
+  def zero: T //identity monad
+  def append(a: T, b: T): T
+}
+
+implicit object IntIsAddable extends Addable[Int] {
+  def zero = 0
+  def append(a: Int, b: Int) = 
+      a + b
+}
+
+implicit object StringIsAddable extends Addable[String] {
+  def zero = ""
+  def append(a: String, b: String) = 
+      a + b
+}
+
+def sum[T](xs: List[T])(implicit addable: Addable[T]) =
+  xs.FoldLeft(addable.zero)(addable.append)
+
+//or the same thing, using context bounds:
+
+def sum[T : Addable](xs: List[T]) = {
+  val addable = implicitly[Addable[T]]
+  xs.FoldLeft(addable.zero)(addable.append)
+}
+```
+
 * What is a `Functor[T]`? (covariant[+] contravariant[-], exponential, applicative, monad, co-monad)
 ```scala
 
 // scalaz, http://eed3si9n.com/learning-scalaz/Functor.html
-things/collections(eg. List) that can be mapped over
+things(I'd say collection(eg. List)) that can be mapped over
 
 // http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
 // [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
 
-Functor transforms a T[A] into a T[B] by applying the fn func.
+Functor[] transforms a T[A] into a T[B] by applying the fn funcX.
 // covariant functor
-// covariant functors —> defines the op map or fMap.
+// covariant functor —> defines the ops map or fMap.
 trait Functor[T[_]]{
-  def fMap[A, B](func : A => B)(ta:T[A]) : T[B]
+  def fMap[A, B](funcX : A => B)(ta:T[A]) : T[B]
 }
-// that's exactly what a functor is.
+// that's exactly what a functor[] is.
 ```
 
 ```
@@ -64,9 +108,8 @@ object Functorise extends App {
      * eg. if M were List, and f was (Int => String)
      * fMap would yield (List[Int] => List[String])
      */
-    def fMap[A, B]
-                  (f: A => B): M[A] => 
-                                      M[B]
+    def fMap[A, B](f: A => B): 
+                          M[A] => M[B]
   }
  
   /* Here are a couple of examples for Option and List Functors
@@ -75,14 +118,14 @@ object Functorise extends App {
  
   implicit 
   object OptionFunctor extends Functor[Option] {
-    def fMap[A, B](f: A => B): Option[A] => Option[B] 
-      = option => option map f
+    def fMap[A, B](f: A => B): Option[A] => Option[B] = 
+                   option => option map f
   }
  
   implicit 
   object ListFunctor extends Functor[List] {
-    def fMap[A, B](f: A => B): List[A]  => List[B] 
-      = list => list map f
+    def fMap[A, B](f: A => B): List[A]  => List[B] = 
+                   list => list map f
   }
  
   /* enrichWithFunctor is an implicit to enrich any kind with an fMap method.
@@ -95,8 +138,8 @@ object Functorise extends App {
     /* fMap requires an implicit functor, whose type is M, to which it
      * delegates to do the real work
      */
-    def mapWith[B](func: A => B)(implicit functor: Functor[M]): M[B] 
-      = functor.fMap(func)(implicitTypeMDelegator)// calls OptionFunctor.fMap or ListFunctor.fMap
+    def mapWith[B](func: A => B)(implicit functor_could_be_list: Functor[M]): M[B] =
+         functor_could_be_list.fMap(func)(implicitTypeMDelegator) //calls OptionFunctor.fMap or ListFunctor.fMap
   }
  
   // usage
@@ -179,9 +222,10 @@ What if now you have a function that puts things in the context?
 ```
 
 ```scala
-// The signature is: 
 // defines the operation commonly known as bind, flatMap or =<<.
+// http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
 
+// The signature is: 
 trait Monad[M[_]] extends Applicative[M]{
   def >>= [A, B](ma : M[A])(f : A => M[B]) : M[B]
 }
@@ -200,8 +244,8 @@ trait Monad[M[_]] extends Applicative[M]{
 ```
 
 ```
-eg, Maybe monad, //https://en.wikipedia.org/wiki/Option_type
-data Maybe x = Just x | Nothing //in haskell
+eg, Maybe monad, // https://en.wikipedia.org/wiki/Option_type
+data Maybe weightOfPackage = Just weightOfPackage | Nothing //in haskell
 
 io monad, 
 doesFileExist :: FilePath -> IO Bool
@@ -216,7 +260,7 @@ removeFile :: FilePath -> IO ()
 // http://api.jquery.com/category/deferred-object/
 ```
 
-* Explain Higher Order Functions.
+* Explain HOF - Higher Order Functions.
 ```scala
 
 // https://gleichmann.wordpress.com/2010/11/28/high-higher-higher-order-functions/
@@ -259,50 +303,6 @@ implicit val userId=89 //considered during implicit resolution
 
 pay      // will print 89
 pay(19) // explicit overrides implicit
-```
-
-* What are typeclasses?
-```
-// [What are type classes in Scala useful for?](http://stackoverflow.com/a/5426131/432903)
-
-/**
-A crucial distinction between type-classes and interfaces is that 
-for class A to be a "member" of an interface it must declare so at the site of its own definition. 
-
-By contrast, any type can be added to a type-class at any time, 
-provided you can provide the required definitions, and so the members of a type class 
-at any given time are dependent on the current scope. 
-*/
-```
-
-```scala
-//yup, it's our friend the monoid, with a different name!
-trait Addable[T] {
-  def zero: T //identity monad
-  def append(a: T, b: T): T
-}
-
-implicit object IntIsAddable extends Addable[Int] {
-  def zero = 0
-  def append(a: Int, b: Int) = 
-      a + b
-}
-
-implicit object StringIsAddable extends Addable[String] {
-  def zero = ""
-  def append(a: String, b: String) = 
-      a + b
-}
-
-def sum[T](xs: List[T])(implicit addable: Addable[T]) =
-  xs.FoldLeft(addable.zero)(addable.append)
-
-//or the same thing, using context bounds:
-
-def sum[T : Addable](xs: List[T]) = {
-  val addable = implicitly[Addable[T]]
-  xs.FoldLeft(addable.zero)(addable.append)
-}
 ```
 
 * What are lenses?
