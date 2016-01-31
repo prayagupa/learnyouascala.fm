@@ -57,61 +57,6 @@ me.name = "NG" // call to a mutator
   much-despised switch/case mechanism
 ```
 
-* What is the difference between a Java `Future` and a Scala `Future` ? (TeachS, 2015)
-
-```scala
-//[What are the differences between a Scala Future and a Java Future](http://stackoverflow.com/a/31368177/432903)
------------------------------------------------------------------------------------------------------------------
-       java.util.concurrent.Future                        |    scala.concurrent.Future
------------------------------------------------------------------------------------------------------------------
-The main inconvenience of java.util.concurrent.Future     | With scala.concurrent.Future you get instead a real 
-is the fact that you can't get the value                  | non-blocking computation as you can attach callbacks
-without blocking.                                         | for completion (.success/.failure) or simply .map() over
-In fact the only way to retrieve the val the get()        | it and chain multiple Futures together in a Monadic  
-method                                                    | fashion.
------------------------------------------------------------------------------------------------------------------
-// http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
- 							  |
-public static class ItemLoader                            |  val clients = 1 until 10 toSeq   
-     implements Callable<List> {                          |
-   private final int clientId;                            |  // start the futures 
-                                                          |  val itemFutures: Seq[Future[Seq[Item]]]=
-  public ItemLoader(int clientId) {    	                  |   clients map { client => 
-     this.clientId = clientId;	                          |     Future { 
-  }                                                       |        new ItemService getItems client }
-                                                          |    }
-  @Override                                               |
-  public List call() throws Exception {                   |
-     ItemService service = new ItemService();             |
-     return service.getItems(clientId);                   |
-  }                                                       |
- } 						          |
-                                                          |
-//							  |
-List<Integer> clients = ...;                              |       // convert list of futures to future of results 
-int p = 4; //parallelism                                  |       val resultFuture: Future[Seq[Seq[Item]]] = 
-ListeningExecutorService threadPool =                     |	      Future sequence itemFutures
-MoreExecutors.listeningDecorator(Executors.newWorkStealingPool(p));
-                                                          |       
-// Submit all the futures                                 |       // flatten the result val itemsFuture: 
-List<ListenableFuture<List>> itemFutures = new ArrayList<>();     Future[Seq[Item]] = 
-for (Integer client : clients) {                          |            resultFuture map (_.flatten)
-    ListenableFuture<List> future =                       | 
-        threadPool.submit(new ItemLoader(client));        |       // blocking until all futures are finished, 
-    itemFutures.add(future);                              |       // but wait at most 10 seconds   
-}                                                         |       val items = Await.result(
-                                                          |                     itemsFuture, 10 seconds)
-//                                                        |
-// convert list of futures to future of results           |
-// Futures == com.google.common.util.concurrent.Futures   |
-ListenableFuture<List<List<Item>>> resultFuture =         |
-        Futures.allAsList(itemFutures);                   |
-                                                          |
-// blocking until finished - we only wait for a single    |
-// Future to complete                                     |
-List<List<Item>> itemResults = resultFuture.get();        |
------------------------------------------------------------------------------------------------------------------
-```
 
 * What is the difference between `unapply` and `apply`, when would you use them?
 
@@ -119,12 +64,25 @@ List<List<Item>> itemResults = resultFuture.get();        |
 
 // For regular parameters apply constructs and unapply de-structures:
 
+case class Event(eventType: String, created: Long)
+
 object Event {
-  def apply(a: A):Event = ...                // makes an Event from an A
-  def unapply(event: Event): Option[A] = ... // retrieve the A from the Event
+
+  def apply(created: A):Event = 
+       Event("PackageShipped", created) // makes an Event from an A
+  
+  def unapply(event: Event): Option[A] = 
+      event match {           // retrieve the A from the Event
+         case Event("PackageShipped", created) => created
+      }
 }
-val e = Event(a)
-e match { case Event(a) => a } 
+
+val date = new Date().getTime()
+
+val event = Event(date)
+event match { 
+ case Event(date) => date
+} 
 ```
 
 * What is a companion `object`?
@@ -138,20 +96,24 @@ e match { case Event(a) => a }
 
 
 class EventService {
-    def addEventToQueue() = {
+    def addToEventQueue() = {
         println("add event to queue")
+    }
+    
+     def readFromEventQueue() = {
+        println("reading event to queue")
     }
 }
 
 object EventService {
-    def creteEvent() {
+    def createEvent() {
         println("Event created!");
     }
 }
 
 //companion usage
 val service : EventService = new EventService()
-service.creteEvent()
+service.createEvent()
 ```
 
 * What is the difference between the following terms and types in Scala: `Nil`, `Null`, `None`, `Nothing`? 
@@ -219,21 +181,25 @@ call (getEventCount()) only happened once.    |
 
 * Define uses for the `Option` monad and good practices it provides. (TeachS, 2015)
 
-```scala
+```
 // CT, Maths
-In category theory, a branch of maths, a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. 
+
+In category theory(a branch of maths) a monad is an endofunctor (a functor mapping a category to itself), together with two natural transformations. 
 Monads are used in the theory of pairs of adjoint functors, and they generalize closure operators on partially ordered sets to arbitrary categories.
+```
+
+```
+// Scala
 
 // [What exactly makes Option a monad in Scala?](http://stackoverflow.com/a/25361305/432903)
-// Scala
 Monad is a concept, an abstract interface if you will, that simply defines a way of composing data.
 
 Option[] supports composition via .flatMap, and that's pretty much everything that is needed to wear the "monad badge".
 
 From a theoretical point of view, Option[] should also:
-* support a unit operation (return, in Haskell terms) to create a monad out of a bare value, which in case of Option is the Some constructor
-* respect the monadic laws
-but this is not strictly enforced by Scala.
+* support a unit operation (return, in Haskell terms) 
+  = to create a monad out of a bare value, which in case of Option is the Some constructor
+* respect the monadic laws = but this is not strictly enforced by Scala.
 
 * Monads in scala are a much looser concept that in Haskell, and the approach is more practical. 
 * The only thing monads are relevant for, from a language perspective, is the ability of being used in a for-comprehension.
@@ -247,9 +213,15 @@ However, there's no such thing as strict conformance to a Monad typeclass, like 
 // Here's an example: let's define our own monad.
 
 class EventMonad[A](value: A) {
-  def map[B](f: A => B) = new EventMonad(f(value))
-  def flatMap[B](f: A => EventMonad[B]) = f(value)
-  override def toString = value.toString
+
+  def map[B](f: A => B) = 
+       new EventMonad(f(value))
+       
+  def flatMap[B](f: A => EventMonad[B]) = 
+       f(value)
+       
+  override def toString = 
+       value.toString
 }
 
 // Implementation
@@ -265,7 +237,8 @@ scala> for {
 * Also since we're yielding a value, we don't need foreach either. 
 * Basically you implement whatever you wish to support, without strict requirements. If you try to filter in a for-comprehension and you haven't implemented withFilter, you'll simply get a compile-time error.
 
-* In Scala everything that has a flatmap is considered a "Monad" and it can be used in for-comprehensions (the equivalent of a do-block in haskell) 
+* In Scala everything that has a flatmap is considered a "Monad" and it can be used in for-comprehensions 
+(the equivalent of a do-block in haskell) 
 
 ```
 
@@ -273,9 +246,11 @@ scala> for {
 ```scala
 // http://stackoverflow.com/a/1059501/432903
 
-// Scala's "for comprehensions" is syntactic sugar for composition of multiple operations with map, flatMap and 
-// filter. Or foreach. Scala actually translates a for-expression into calls to those methods, so any class 
-// providing them, or a subset of them, can be used with for comprehensions.
+Scala's "for comprehensions" is syntactic sugar for "composition of multiple operations" with map, flatMap and 
+filter. Or foreach. 
+
+Scala actually translates a for-expression into calls to those methods, so any class 
+providing them, or a subset of them, can be used with for comprehensions.
 
 for(x <- c1; y <- c2; z <- c3) yield {...}    | c1.flatMap(x => c2.flatMap(y => c3.map(z => {...})))
 for(x <- c; if cond) yield {...}              | c.filter(x => cond).map(x => {...})
@@ -288,8 +263,8 @@ for(x <- c; y = ...) yield {...}              | c.map(x => (x, ...)).map((x,y) =
 * Explain the implicit parameter precedence.
 ```
 // [Where does Scala look for implicits?](http://stackoverflow.com/a/5598107/432903)
-// Implicits in Scala refers to either a value that can be passed "automatically", so to speak, or a conversion 
-// from one type to another that is made automatically.
+Implicits in Scala refers to either a value that can be passed "automatically", so to speak, or a conversion 
+from one type to another that is made automatically.
 ```
 
 ```scala
@@ -307,6 +282,63 @@ def sum[T](list: List[T])(implicit integral: Integral[T]): T = {
     list.foldLeft(integral.zero)(_ + _)
 }
 ```
+
+* What is the difference between a Java `Future` and a Scala `Future` ? (TeachS, 2015)
+
+```scala
+//[What are the differences between a Scala Future and a Java Future](http://stackoverflow.com/a/31368177/432903)
+-----------------------------------------------------------------------------------------------------------------
+       java.util.concurrent.Future                        |    scala.concurrent.Future
+-----------------------------------------------------------------------------------------------------------------
+The main inconvenience of java.util.concurrent.Future     | With scala.concurrent.Future you get instead a real 
+is the fact that you can't get the value                  | non-blocking computation as you can attach callbacks
+without blocking.                                         | for completion (.success/.failure) or simply .map() over
+In fact the only way to retrieve the val the get()        | it and chain multiple Futures together in a Monadic  
+method                                                    | fashion.
+-----------------------------------------------------------------------------------------------------------------
+// http://www.javacodegeeks.com/2014/11/from-java-7-futures-to-akka-actors-with-scala.html
+ 							  |
+public static class ItemLoader                            |  val clients = 1 until 10 toSeq   
+     implements Callable<List> {                          |
+   private final int clientId;                            |  // start the futures 
+                                                          |  val itemFutures: Seq[Future[Seq[Item]]]=
+  public ItemLoader(int clientId) {    	                  |   clients map { client => 
+     this.clientId = clientId;	                          |     Future { 
+  }                                                       |        new ItemService getItems client }
+                                                          |    }
+  @Override                                               |
+  public List call() throws Exception {                   |
+     ItemService service = new ItemService();             |
+     return service.getItems(clientId);                   |
+  }                                                       |
+ } 						          |
+                                                          |
+//							  |
+List<Integer> clients = ...;                              |       // convert list of futures to future of results 
+int p = 4; //parallelism                                  |       val resultFuture: Future[Seq[Seq[Item]]] = 
+ListeningExecutorService threadPool =                     |	      Future sequence itemFutures
+MoreExecutors.listeningDecorator(Executors.newWorkStealingPool(p));
+                                                          |       
+// Submit all the futures                                 |       // flatten the result val itemsFuture: 
+List<ListenableFuture<List>> itemFutures = new ArrayList<>();     Future[Seq[Item]] = 
+for (Integer client : clients) {                          |            resultFuture map (_.flatten)
+    ListenableFuture<List> future =                       | 
+        threadPool.submit(new ItemLoader(client));        |       // blocking until all futures are finished, 
+    itemFutures.add(future);                              |       // but wait at most 10 seconds   
+}                                                         |       val items = Await.result(
+                                                          |                     itemsFuture, 10 seconds)
+//                                                        |
+// convert list of futures to future of results           |
+// Futures == com.google.common.util.concurrent.Futures   |
+ListenableFuture<List<List<Item>>> resultFuture =         |
+        Futures.allAsList(itemFutures);                   |
+                                                          |
+// blocking until finished - we only wait for a single    |
+// Future to complete                                     |
+List<List<Item>> itemResults = resultFuture.get();        |
+-----------------------------------------------------------------------------------------------------------------
+```
+
 
 Streams:
 --------------
