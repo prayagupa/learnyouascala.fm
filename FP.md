@@ -15,17 +15,67 @@ listOfSiteEvents.flatten
 
 * What are typeclasses?
 ```
-// [What are type classes in Scala useful for?](http://stackoverflow.com/a/5426131/432903)
+The idea of typeclasses is that you provide evidence that a class satisfies an interface.
 
-/**
+//http://www.cakesolutions.net/teamblogs/demystifying-implicits-and-typeclasses-in-scala
+// http://eed3si9n.com/learning-scalaz/day1.html
+// http://learnyouahaskell.com/types-and-typeclasses
+
+trait CanDoSomething[A] { //Typeclass (looks like interface??)
+  def doSomething(x: A): String
+}
+
+case class Bird(sound: String)
+
+object BirdCanDoSomething extends CanDoSomething[Bird] {
+  def doSomething(x: Bird) = 
+       x.sound
+}
+
+Problem
+//If you want to take a thing that CanDoSomething, you need to both ask for 
+* the class instance and 
+* the proof from your caller.
+
+def doSomething[A](thing: A, evidence: CanDoSomething[A]) = 
+      evidence.doSomething(thing)
+      
+Solution
+// Bird and CanDoSomething in scope
+
+implicit object BirdCanDoSomething extends CanDoSomething[Bird] {
+  def doSomething(x: Bird) = 
+       x.sound
+}
+
+def doSomething[A](thing: A)(implicit evidence: CanDoSomething[A]) = 
+      evidence.doSomething(thing)
+      
+doSomething(Bird("quack"))
+
+//using syntactic sugar
+def doSomething[A:CanDoSomething](thing: A) = 
+     implicitly[CanDoSomething[A]].doSomething(thing)
+```
+
+[What are type classes in Scala useful for?](http://stackoverflow.com/a/5426131/432903)
+<table>
+<tr>
+<td>interface</td>
+<td>typeclass</td>
+</tr>
+<tr>
+<td>
 A crucial distinction between type-classes and interfaces is that 
 for class A to be a "member" of an interface it must declare so at the site of its own definition. 
-
+</td>
+<td>
 By contrast, any type can be added to a type-class at any time, 
 provided you can provide the required definitions, and so the members of a type class 
 at any given time are dependent on the current scope. 
-*/
-```
+</td>
+</tr>
+</table>
 
 ```scala
 //yup, it's our friend the monoid, with a different name!
