@@ -43,8 +43,8 @@ abstract class TweetSet {
    * Question: Can we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
-  
+    def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new EmptySet)
+
   /**
    * This is a helper method for `filter` that propagetes the accumulated tweets.
    */
@@ -57,7 +57,7 @@ abstract class TweetSet {
    * and be implemented in the subclasses?
    */
     def union(that: TweetSet): TweetSet
-  
+
   /**
    * Returns the tweet from this set which has the greatest retweet count.
    *
@@ -68,7 +68,7 @@ abstract class TweetSet {
    * and be implemented in the subclasses?
    */
     def mostRetweeted: Tweet
-  
+
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
    * in descending order. In other words, the head of the resulting list should
@@ -79,7 +79,7 @@ abstract class TweetSet {
    * and be implemented in the subclasses?
    */
     def descendingByRetweet: TweetList
-  
+
   /**
    * The following methods are already implemented
    */
@@ -90,7 +90,7 @@ abstract class TweetSet {
    *
    * If `this.contains(tweet)`, the current set is returned.
    */
-  def incl(tweet: Tweet): TweetSet
+  def include(tweet: Tweet): TweetSet
 
   /**
    * Returns a new `TweetSet` which excludes `tweet`.
@@ -111,16 +111,16 @@ abstract class TweetSet {
 
 }
 
-class Empty extends TweetSet {
-    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = new Empty
-  
+class EmptySet extends TweetSet {
+    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = new EmptySet
+
   /**
    * The following methods are already implemented
    */
 
   def contains(tweet: Tweet): Boolean = false
 
-  def incl(tweet: Tweet): TweetSet = new NonEmpty(tweet, new Empty, new Empty)
+  def include(tweet: Tweet): TweetSet = new OrderedSet(tweet, new EmptySet, new EmptySet)
 
   def remove(tweet: Tweet): TweetSet = this
 
@@ -137,14 +137,14 @@ class Empty extends TweetSet {
   override def mostRetweeted: Tweet = throw new NoSuchElementException
 }
 
-class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
+class OrderedSet(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
     def filterAcc(predicate: Tweet => Boolean, accumulator: TweetSet): TweetSet = {
       val searchLeftRight = left.filterAcc(predicate, accumulator) union right.filterAcc(predicate, accumulator)
-      if(predicate(elem)) searchLeftRight.incl(elem)
+      if(predicate(elem)) searchLeftRight.include(elem)
       else searchLeftRight
     }
-    
+
   /**
    * The following methods are already implemented
    */
@@ -154,15 +154,15 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     else if (elem.text < x.text) right.contains(x)
     else true
 
-  def incl(x: Tweet): TweetSet = {
-    if (x.text < elem.text) new NonEmpty(elem, left.incl(x), right)
-    else if (elem.text < x.text) new NonEmpty(elem, left, right.incl(x))
+  def include(tweetToAdd: Tweet): TweetSet = {
+    if (tweetToAdd.text < elem.text) new OrderedSet(elem, left.include(tweetToAdd), right)
+    else if (elem.text < tweetToAdd.text) new OrderedSet(elem, left, right.include(tweetToAdd))
     else this
   }
 
   def remove(tw: Tweet): TweetSet =
-    if (tw.text < elem.text) new NonEmpty(elem, left.remove(tw), right)
-    else if (elem.text < tw.text) new NonEmpty(elem, left, right.remove(tw))
+    if (tw.text < elem.text) new OrderedSet(elem, left.remove(tw), right)
+    else if (elem.text < tw.text) new OrderedSet(elem, left, right.remove(tw))
     else left.union(right)
 
   def foreach(f: Tweet => Unit): Unit = {
@@ -174,7 +174,7 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   override def isEmpty = false
 
   override def union(that: TweetSet): TweetSet = {
-    val x= left.union(right.union(that.incl(elem)))
+    val x= left.union(right.union(that.include(elem)))
     x
   }
 
