@@ -16,7 +16,7 @@ abstract class EventDispatcher[A, B, H <: TwoEventsHandler[A, B]] {
 
 class EventReader(implicit consumer: Consumer) {
 
-  import MyEventsHandler._
+  import MyTwoEventsHandler._
   val eventStream = List(Event1(1), Event2("test"), Event3(3.1415))
 
   def process(): Unit = {

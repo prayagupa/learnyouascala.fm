@@ -5,6 +5,18 @@ import org.scalatest.FunSuite
   * on 1/18/17.
   */
 
+class ScalaReflectionSpecs extends FunSuite {
+  test("returns generics class type") {
+    println(s"${new TVBroadcastable().machineType.getName} == ${classOf[TV].getName}")
+    assert(new TVBroadcastable().machineType.getName == classOf[TV].getName)
+
+    println(s"${new TVBroadcastable().machine("TV", "12").getClass.getName} == ${classOf[TV].getName}")
+    assert(new TVBroadcastable().machine("TV", "322").getClass.getName == classOf[TV].getName)
+  }
+}
+
+//prod
+
 trait Machine {
   def hertz : String
 }
@@ -37,14 +49,4 @@ abstract class AbstractBroadcastable[A <: Machine] extends Broadcastable[A] {
 
 class TVBroadcastable extends AbstractBroadcastable[TV] {
   def machineType(implicit m: Manifest[TV]): Class[_] = m.runtimeClass
-}
-
-class ScalaReflectionSpecs extends FunSuite {
-  test("returns generics class type") {
-    println(s"${new TVBroadcastable().machineType.getName} == ${classOf[TV].getName}")
-    assert(new TVBroadcastable().machineType.getName == classOf[TV].getName)
-
-    println(s"${new TVBroadcastable().machine("TV", "12").getClass.getName} == ${classOf[TV].getName}")
-    assert(new TVBroadcastable().machine("TV", "322").getClass.getName == classOf[TV].getName)
-  }
 }

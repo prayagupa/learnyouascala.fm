@@ -1,4 +1,4 @@
-package generics.dispatchhh
+package generics.dispatch_eventsourcing
 
 /**
   * Created by prayagupd
@@ -57,7 +57,7 @@ class AnotherConcreteConsumer extends Consumer2[E1, E3] {
 }
 object AnotherConcreteConsumer extends Consume2Object[E1, E3, AnotherConcreteConsumer]
 
-object MyApp extends App {
+object DispatcherSpecs extends App {
 
   someExample()
   anotherExample()
