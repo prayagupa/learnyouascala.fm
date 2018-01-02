@@ -6,16 +6,29 @@ basic funs on Set
 -----------------
 
 ```
-  // Set is represented by its characteristic function, i.e. contains predicate.
-  type Set = (Int => Boolean)
-  
-  def contains(set: Set, elementToCheck: Int): Boolean
+// Set is represented by its characteristic function, i.e. contains predicate.
+scala> type Set = (Int => Boolean)
+defined type alias Set
+
+scala> def contains(set: Set, elementToCheck: Int): Boolean = set(elementToCheck)
+contains: (set: Set, elementToCheck: Int)Boolean
+
+scala> def singletonSet(elem: Int): Set = { givenParamPassedToFn => givenParamPassedToFn == elem }
+singletonSet: (elem: Int)Set
 ```
 
 eg. 
 
 ```
-val set = singletonSet(89) = {x => x == 89}
+scala> val mySet = singletonSet(89)
+mySet: Set = $$Lambda$1552/139657330@1c4e9c50
+
+scala> contains(mySet, 89)
+res62: Boolean = true
+
+scala> contains(mySet, 98)
+res63: Boolean = false
+
 
 ```
 
