@@ -1,15 +1,11 @@
-#Scala Job Interview Questions
-
-This file contains a number of Scala interview questions that can be used when vetting potential candidates. It is by no means recommended to use every single question here on the same candidate (that would take hours). Choosing a few items from this list should help you vet the intended skills you require.
-
-**Note:** Keep in mind that many of these questions are open-ended and could lead to interesting discussions that tell you more about the person's capabilities than a straight answer would.
+#Scala 
 
 ## Table of Contents
 
   1. [General Questions](#general-questions)
-  2. [Language Questions](https://github.com/prayagupd/Scala-Interview-Questions/blob/master/LanguageQN.md#language-questions)
-  3. [FP Questions](https://github.com/prayagupd/Scala-Interview-Questions/blob/master/FP.md#functional-programming-questions)
-  4. [Reactive Programming Questions](https://github.com/prayagupd/Scala-Interview-Questions/blob/master/Reactive.md#reactive-programming-questions)
+  2. [Language Questions](https://github.com/prayagupd/learnyouascala.fm/blob/master/LanguageQN.md#language-questions)
+  3. [FP Questions](https://github.com/prayagupd/learnyouascala.fm/blob/master/FP.md#functional-programming-questions)
+  4. [Reactive Programming Questions](https://github.com/prayagupd/learnyouascala.fm/blob/master/Reactive.md#reactive-programming-questions)
   5. [Coding Questions](#coding-questions)
   6. [Fun Questions](#fun-questions)
 
@@ -51,9 +47,3 @@ List(List(1)).join                                        // res0: List[Int] = L
 List(true, false).ifM(List(0, 1), List(2, 3))             // res1: List[Int] = List(0, 1, 2, 3)
 
 ```
-
-## Getting Involved
-
-  1. [Contributors](#contributors)
-  1. [How to Contribute](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/CONTRIBUTING.md)
-  1. [License](https://github.com/jarlakxen/Scala-Interview-Questions/blob/master/LICENSE.md)
