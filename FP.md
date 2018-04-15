@@ -1,6 +1,7 @@
 #### Functional Programming Questions:
 
 * How can you make a `List[String]` from a `List[List[String]]`?
+
 ```scala
 // http://alvinalexander.com/scala/how-to-flatten-list-lists-in-scala-with-flatten-method
 
@@ -13,14 +14,17 @@ listOfSiteEvents.flatten
                 .sorted
 ```
 
-* What are typeclasses?
-```
-The idea of typeclasses is that you provide evidence that a class satisfies an interface.
+What are typeclasses?
+---------------------
 
-//http://www.cakesolutions.net/teamblogs/demystifying-implicits-and-typeclasses-in-scala
-// http://eed3si9n.com/learning-scalaz/day1.html
-// http://learnyouahaskell.com/types-and-typeclasses
+The idea of `typeclass`es is that you provide evidence that a class satisfies an interface.
+(OO Factory pattern)
 
+- http://www.cakesolutions.net/teamblogs/demystifying-implicits-and-typeclasses-in-scala
+- http://eed3si9n.com/learning-scalaz/day1.html
+- http://learnyouahaskell.com/types-and-typeclasses
+
+```scala
 trait CanDoSomething[A] { //Typeclass (looks like interface??)
   def doSomething(x: A): String
 }
@@ -28,21 +32,23 @@ trait CanDoSomething[A] { //Typeclass (looks like interface??)
 case class Bird(sound: String)
 
 object BirdCanDoSomething extends CanDoSomething[Bird] {
-  def doSomething(x: Bird) = 
-       x.sound
+  def doSomething(x: Bird) = x.sound
 }
+```
 
-Problem
-//If you want to take a thing that CanDoSomething, you need to both ask for 
+Problem: 
+If you want to take a thing that `CanDoSomething`, you need to both ask for 
 * the class instance and 
 * the proof from your caller.
 
-def doSomething[A](thing: A, evidence: CanDoSomething[A]) = 
-      evidence.doSomething(thing)
-      
-Solution
-// Bird and CanDoSomething in scope
+```scala
+def doSomething[A](thing: A, evidence: CanDoSomething[A]) = evidence.doSomething(thing)
+```
 
+     
+Solution: Bird and CanDoSomething in scope
+
+```scala
 implicit object BirdCanDoSomething extends CanDoSomething[Bird] {
   def doSomething(x: Bird) = 
        x.sound
@@ -66,7 +72,7 @@ def doSomething[A:CanDoSomething](thing: A) =
 </tr>
 <tr>
 <td>
-A crucial distinction between type-classes and interfaces is that 
+A crucial distinction between type-classes and interfaces is that: 
 for class A to be a "member" of an interface it must declare so at the site of its own definition. 
 </td>
 <td>
@@ -76,6 +82,8 @@ at any given time are dependent on the current scope.
 </td>
 </tr>
 </table>
+
+Addable typeclass;
 
 ```scala
 //yup, it's our friend the monoid, with a different name!
@@ -107,23 +115,30 @@ def sum[T : Addable](xs: List[T]) = {
 }
 ```
 
-* What is a `Functor[T]`? (covariant[+] contravariant[-], exponential, applicative, monad, co-monad)
+[What is a `Functor[T]`? (covariant[+] contravariant[-], exponential, applicative, monad, co-monad)](https://gist.github.com/prayagupd/33b2886b2f7b06cb767ad60fdd38a2d2#functors)
+-------------------------
+
+- scalaz, http://eed3si9n.com/learning-scalaz/Functor.html
+
+things(I'd say collection(eg. List, Future)) that can be mapped/composed over
+
+- http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
+- [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
+
+Functor[T[_]] transforms a T[A] into a T[B] by applying the function funcX.
+
 ```scala
 
-// scalaz, http://eed3si9n.com/learning-scalaz/Functor.html
-things(I'd say collection(eg. List)) that can be mapped over
-
-// http://blog.tmorris.net/posts/functors-and-things-using-scala/index.html
-// [Scala Functor and Monad differences](http://stackoverflow.com/a/8464561/432903)
-
-Functor[] transforms a T[A] into a T[B] by applying the fn funcX.
 // covariant functor
 // covariant functor —> defines the ops map or fMap.
 trait Functor[T[_]]{
-  def fMap[A, B](funcX : A => B)(ta:T[A]) : T[B]
+  def map[A, B](funcX : A => B)(ta:T[A]) : T[B]
 }
-// that's exactly what a functor[] is.
+// that's exactly what a functor[T] is.
 ```
+
+Just what is a Functor, really?
+Functor is a typeclass.
 
 ```
 // haskell -> Box analogy
@@ -168,14 +183,12 @@ object Functorise extends App {
  
   implicit 
   object OptionFunctor extends Functor[Option] {
-    def fMap[A, B](f: A => B): Option[A] => Option[B] = 
-                   option => option map f
+    def fMap[A, B](f: A => B): Option[A] => Option[B] = option => option map f
   }
  
   implicit 
   object ListFunctor extends Functor[List] {
-    def fMap[A, B](f: A => B): List[A]  => List[B] = 
-                   list => list map f
+    def fMap[A, B](f: A => B): List[A]  => List[B] = list => list map f
   }
  
   /* enrichWithFunctor is an implicit to enrich any kind with an fMap method.
@@ -206,18 +219,18 @@ object Functorise extends App {
 
 ```
 
+What is a `Applicative[T[_]]`?
+------------------------------
 
-* What is a `applicative`?
-```
 Background
 -------------
+
 * Functor[T] allow us to apply fns to things in a context. 
 
 * So far, 
 when we were mapping fn over functors, we usually mapped fns that take only one parameter. 
 But, 
-what happens when we map a fn like *, which takes 2 parameters, over a functor?
-```
+what happens when we map a fn like `*`, which takes 2 parameters, over a functor?
 
 But, what if the fns we want to apply are already in a context? 
 
@@ -238,14 +251,11 @@ trait Applicative[T[_]] extends Functor[T]{
 }
 
 eg. 
-val res = List(1, 2, 3, 4) map {
-                 (_: Int) * (_:Int)
-          }.curried
-          
-res map {_(9)}
+scala> List(1, 2, 3, 4) map { (_: Int) * (_:Int) }.curried
+res1: List[Int => Int] = List(scala.Function2$$Lambda$1630/334183260@5c4125a0, scala.Function2$$Lambda$1630/334183260@16bac4af, scala.Function2$$Lambda$1630/334183260@2e8da4c1, scala.Function2$$Lambda$1630/334183260@44c8d6f)
 
-output:
-List[Int] = List(9, 18, 27, 36)
+scala> res1 map {_(9)}
+res2: List[Int] = List(9, 18, 27, 36)
 
 // List (actually the list type constructor, []) is applicative functor. 
 // What a surprise!
@@ -260,9 +270,11 @@ f(3.some, List(4).some)
 <h2>So far so good.</h2> 
 What if now you have a function that puts things in the context? 
 
-```
-// Now comes the monads: 
 
+Now comes the monads: 
+--------------------
+
+```
 // It's signature will be g:X => M[X] ... you can't use a functor because it expects X => Y 
 // so we'll end with M[M[X]], you can't use the applicative functor because is expecting the fn already in the 
 // context M[X => Y] .
