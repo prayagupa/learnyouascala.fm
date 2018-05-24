@@ -22,6 +22,7 @@
 #### Coding Questions:
 
 * What is the difference (if any) between these 2 statements? 
+
 ```scala
   var x = immutable.Set[Int]()
   val y = mutable.Set[Int]()
@@ -33,17 +34,56 @@
 * What testing framework for Scala do you use?
 * What do you know about property based testing frameworks, such as Scalacheck?
 * Do you like ‘scalaz‘?
+
 ```scala
 // Scala library for functional programming.
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.4"
 
+scala> import scalaz._
 import scalaz._
-import std.option._, std.list._ // functions and type class instances for Option and List
 
-Apply[Option].apply2(some(1), some(2))((a, b) => a + b)   // res0: Option[Int] = Some(3)
-Traverse[List].traverse(List(1, 2, 3))(i => some(i))      // res1: Option[List[Int]] = Some(List(1, 2, 3))
-List(List(1)).join                                        // res0: List[Int] = List(1)
-List(true, false).ifM(List(0, 1), List(2, 3))             // res1: List[Int] = List(0, 1, 2, 3)
+// functions and type class instances for Option and List
+scala> import std.option._, std.list._
+import std.option._
+import std.list._
 
+scala> final case class Item(name: String, price: Int)
+defined class Item
+
+scala> Apply[Option].apply2(some(Item("guiter", 100)), some(Item("amp", 200)))((item1, item2) => item1.price + item2.price)
+res0: Option[Int] = Some(300)
+```
+
+```scala
+scala> Traverse[List].traverse(List(Item("guitar", 1), Item("amp", 2)))(i => some(i))
+res1: Option[List[Item]] = Some(List(Item(guitar,1), Item(amp,2)))
+
+scala> Traverse[List].traverse(List.empty[Item])(i => some(i))
+res3: Option[List[Item]] = Some(List())
+```
+
+get all items purchased
+
+```scala
+scala> import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
+
+scala> final case class Order(orderId: String, items: List[Item])
+defined class Order
+
+scala> List(Order("1", List(Item("guiter", 1))), Order("2", List(Item("amp", 2)))).map(_.items).join
+res13: List[Item] = List(Item(guiter,1), Item(amp,2))
+```
+
+```scala
+scala> final case class Order(orderId: String, items: List[Item], status: String)
+defined class Order
+
+scala> val orders = List(Order("1", List(Item("guiter", 1)), "delivered"), Order("2", List(Item("amp", 2)), "delivered"), Order("1", List(Item("drum kit", 3)), "processing"))
+orders: List[Order] = List(Order(1,List(Item(guiter,1)),delivered), Order(2,List(Item(amp,2)),delivered), Order(1,List(Item(drum kit,3)),processing))
+
+scala> List(orders.filter(_.status == "processing").size > 0, orders.filter(_.status == "processing").size > 0).ifM(orders.filter(_.status == "processing"), orders)
+res21: List[Order] = List(Order(1,List(Item(drum kit,3)),processing), Order(1,List(Item(drum kit,3)),processing))
 ```
