@@ -1,6 +1,6 @@
 import org.scalatest.{FunSuite, Matchers}
 
-class Problem1Spec extends FunSuite with Matchers {
+class EitherTCatsSpec extends FunSuite with Matchers {
 
   import scala.concurrent.Await
   import scala.util.Try
