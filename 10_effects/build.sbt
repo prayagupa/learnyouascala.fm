@@ -1,4 +1,4 @@
-name := "9_error_handling"
+name := "10_effects"
 
 scalaVersion := "2.12.6"
 
@@ -14,3 +14,4 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
   "org.scalaz" %% "scalaz-core" % "7.2.23"
 )
+
