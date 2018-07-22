@@ -30,11 +30,16 @@ class EffectsExampleSpec extends FunSuite with Matchers {
 
     import cats.effect.IO
 
-    val application = IO.pure("customer id").flatMap(id => IO {
-      println(s"""customer: $id""")
-    })
+    val application = IO.pure(100)
+      .flatMap(price => IO { price * 0.80 })
+      .flatMap(totalPrice => IO { 0 / 0 })
 
-    application.attempt
+    val result = application.attempt flatMap {
+      case Right(r) => IO { println(s"$r") }
+      case Left(l) => IO { println(s"error: $l") }
+    }
+
+    result.unsafeRunSync()
   }
 
 }
