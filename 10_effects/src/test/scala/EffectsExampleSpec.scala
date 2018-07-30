@@ -1,4 +1,8 @@
+import java.util.concurrent.Executors
+
 import org.scalatest.{FunSuite, Matchers}
+
+import scala.concurrent.ExecutionContext
 
 // https://typelevel.org/cats-effect/datatypes/io.html
 class EffectsExampleSpec extends FunSuite with Matchers {
@@ -31,15 +35,37 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     import cats.effect.IO
 
     val application = IO.pure(100)
-      .flatMap(price => IO { price * 0.80 })
-      .flatMap(totalPrice => IO { 0 / 0 })
+      .flatMap(price => IO {
+        price * 0.80
+      })
+      .flatMap(totalPrice => IO {
+        0 / 0
+      })
 
     val result = application.attempt flatMap {
-      case Right(r) => IO { println(s"$r") }
-      case Left(l) => IO { println(s"error: $l") }
+      case Right(r) => IO {
+        println(s"$r")
+      }
+      case Left(l) => IO {
+        println(s"error: $l")
+      }
     }
 
     result.unsafeRunSync()
   }
 
+  test("effect again") {
+
+    import cats.effect.IO
+
+    val nonBlockingExecContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
+
+    val res = for {
+      _ <- IO { println(Thread.currentThread().getName) }
+      _ <- IO.shift(nonBlockingExecContext)
+      _ <- IO { println(Thread.currentThread().getName) }
+    } yield ()
+
+    res.unsafeRunSync()
+  }
 }
