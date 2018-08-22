@@ -12,11 +12,12 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "alleycats-core" % "1.1.0",
 
   "org.scalaz" %% "scalaz-core" % "7.2.23",
-  "org.scalaz" %% "scalaz-zio" % "0.1.0-SNAPSHOT",
+  "org.scalaz" %% "scalaz-zio" % "0.1.0-18b6172",
 
   "org.scalacheck" %% "scalacheck" % "1.13.5",
   "org.scalatest" %% "scalatest" % "3.0.4" % Test
 )
 
 val nexus = "https://oss.sonatype.org/"
-resolvers += "sonatype snapshots" at nexus + "content/repositories/snapshots"
+//resolvers += "sonatype snapshots" at nexus + "content/repositories/snapshots"
+resolvers += "sonatype releases" at nexus + "content/repositories/staging"

@@ -7,6 +7,33 @@ import scala.concurrent.ExecutionContext
 // https://typelevel.org/cats-effect/datatypes/io.html
 class EffectsExampleSpec extends FunSuite with Matchers {
 
+
+  test("future specs") {
+
+    import scala.concurrent.Future
+    import scala.concurrent.ExecutionContext
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    def getPeople = Future {
+      List("Steven", "Wilson", "Michael")
+    }
+
+    def getStatus(name: String) = Future {
+      s"$name updated"
+    }
+
+    val updatedPeopleUsingSeq: Future[List[String]] = getPeople.flatMap { people =>
+      Future.sequence {
+        people.map(getStatus)
+      }
+    }
+
+    Thread.sleep(1000)
+
+    println(updatedPeopleUsingSeq)
+  }
+
   test("deferring effects") {
 
     import cats.effect.IO
@@ -61,9 +88,13 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     val nonBlockingExecContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
 
     val res = for {
-      _ <- IO { println(Thread.currentThread().getName) }
+      _ <- IO {
+        println(Thread.currentThread().getName)
+      }
       _ <- IO.shift(nonBlockingExecContext)
-      _ <- IO { println(Thread.currentThread().getName) }
+      _ <- IO {
+        println(Thread.currentThread().getName)
+      }
     } yield ()
 
     res.unsafeRunSync()
