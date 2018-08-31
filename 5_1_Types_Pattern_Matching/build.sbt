@@ -1,15 +1,16 @@
 name := course.value + "-" + assignment.value
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.12.6"
 
 scalacOptions ++= Seq("-deprecation")
 
-// grading libraries
-libraryDependencies += "junit" % "junit" % "4.10" % "test"
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1",
+  "com.chuusai" %% "shapeless" % "2.3.3",
+  "org.typelevel" %% "cats-core" % "1.2.0",
 
-// for funsets
-libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
-libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
+  "junit" % "junit" % "4.10" % "test"
+)
 
 // include the common dir
 commonSourcePackages += "common"
