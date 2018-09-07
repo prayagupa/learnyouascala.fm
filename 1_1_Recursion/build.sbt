@@ -1,6 +1,6 @@
 name := course.value + "-" + assignment.value
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.6"
 
 scalacOptions ++= Seq("-deprecation")
 
@@ -12,6 +12,10 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 
 // include the common dir
 commonSourcePackages += "common"
+
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.26"
+
+libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.2.26"
 
 courseId := "bRPXgjY9EeW6RApRXdjJPw"
 
