@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class PascalSuite extends FunSuite {
-  import Main.pascal
+  import PascalTriangle.pascal
     test("pascal: col=0,row=2") {
       assert(pascal(0,2) === 1)
   }
