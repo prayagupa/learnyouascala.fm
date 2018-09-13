@@ -1,78 +1,17 @@
-name := course.value + "-" + assignment.value
+name := "algebric-data-types"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.6"
 
 scalacOptions ++= Seq("-deprecation")
 
-// grading libraries
 libraryDependencies += "junit" % "junit" % "4.10" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4"
 
-// for funsets
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.26"
+libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.2.26"
+
+libraryDependencies += "org.typelevel" %% "cats-core" % "1.3.1"
+
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 
 resolvers += "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository"
-
-//resolvers += "artifactory-local-releases" at "https://code.bestbuy.com/artifactory/libs-release-local"
-//resolvers += "artifactory-local-snapshots" at "https://code.bestbuy.com/artifactory/libs-snapshot-local"
-
-// include the common dir
-commonSourcePackages += "common"
-
-courseId := "bRPXgjY9EeW6RApRXdjJPw"
-
-// See documentation in ProgFunBuild.scala
-assignmentsMap := {
-  val styleSheetPath = (baseDirectory.value / ".." / ".." / "project" / "scalastyle_config.xml").getPath
-  Map(
-    "example" -> Assignment(
-      packageName = "example",
-      key = "g4unnjZBEeWj7SIAC5PFxA",
-      itemId = "xIz9O",
-      partId = "d5jxI",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "recfun" -> Assignment(
-      packageName = "recfun",
-      key = "SNYuDzZEEeWNVyIAC92BaQ",
-      itemId = "Ey6Jf",
-      partId = "PzVVY",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "funsets" -> Assignment(
-      packageName = "funsets",
-      key = "FNHHMDfsEeWAGiIAC46PTg",
-      itemId = "BVa6a",
-      partId = "IljBE",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "objsets" -> Assignment(
-      packageName = "objsets",
-      key = "6PTXvD99EeWAiCIAC7Pj9w",
-      itemId = "Ogg05",
-      partId = "7hlkb",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath,
-      options = Map("grader-timeout" -> "1800")),
-    "patmat" -> Assignment(
-      packageName = "patmat",
-      key = "BwkTtD9_EeWFZSIACtiVgg",
-      itemId = "uctOq",
-      partId = "2KYZc",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "forcomp" -> Assignment(
-      packageName = "forcomp",
-      key = "CPJe397VEeWLGArWOseZkw",
-      itemId = "nVRPb",
-      partId = "v2XIe",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath,
-      options = Map("grader-timeout" -> "1800"))
-  )
-}

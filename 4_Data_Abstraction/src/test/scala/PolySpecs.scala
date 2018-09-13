@@ -1,19 +1,20 @@
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 
 /**
   * Created by prayagupd
   * on 1/23/17.
   */
 
-class PolySpecs extends FunSuite {
+class PolySpecs extends FunSuite with Matchers {
   test("polymorphism") {
-    val originalEvent : BaseEvent = SomethingHappened(0, classOf[SomethingHappened].getSimpleName, payload = "{}",
+    val originalEvent: BaseEvent = SomethingHappened(0, classOf[SomethingHappened].getSimpleName, payload = "{}",
       newField = "apple")
     val event2 = originalEvent.copyy(100).asInstanceOf[SomethingHappened]
 
     assert(event2.eventOffset == 100)
     assert(event2.eventType == "SomethingHappened")
     assert(event2.newField == "apple")
+
   }
 }
 
@@ -23,7 +24,7 @@ trait BaseEvent {
 
   def eventType: String
 
-  def copyy(eO: Long) : BaseEvent
+  def copyy(eO: Long): BaseEvent
 }
 
 case class SomethingHappened(eventOffset: Long, eventType: String, payload: String, newField: String) extends BaseEvent {
