@@ -7,49 +7,45 @@ import scala.concurrent.ExecutionContext
 // https://typelevel.org/cats-effect/datatypes/io.html
 class EffectsExampleSpec extends FunSuite with Matchers {
 
-
   test("future specs") {
 
     import scala.concurrent.Future
-    import scala.concurrent.ExecutionContext
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val nonBlockingExCtx: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    def getPeople = Future {
-      List("Steven", "Wilson", "Michael")
+    def getCustomerIds = Future {
+      List("ID01", "ID02", "ID03")
     }
 
-    def getStatus(name: String) = Future {
-      s"$name updated"
+    def getStatus(id: String) = Future {
+      s"IN PROGRESS"
     }
 
-    val updatedPeopleUsingSeq: Future[List[String]] = getPeople.flatMap { people =>
+    val deliverStatusUsingSeq: Future[List[String]] = getCustomerIds.flatMap { ids =>
       Future.sequence {
-        people.map(getStatus)
+        ids.map(id => getStatus(id))
       }
     }
 
     Thread.sleep(1000)
 
-    println(updatedPeopleUsingSeq)
+    println(deliverStatusUsingSeq)
   }
 
   test("deferring effects") {
 
     import cats.effect.IO
 
-    val writeData: IO[Unit] = IO {
+    val readData: IO[Unit] = IO {
       println("read from database")
     }
 
     val program: IO[Unit] = for {
-      data <- writeData
-      data2 <- writeData
+      data <- readData
+      data2 <- readData
     } yield ()
 
-    val execution = program.attempt
-
-    execution.map {
+    val execution = program.attempt.map {
       case Right(r) => println(r)
       case Left(l) => println(l)
     }
@@ -61,9 +57,11 @@ class EffectsExampleSpec extends FunSuite with Matchers {
 
     import cats.effect.IO
 
-    val application = IO.pure(100)
-      .flatMap(price => IO {
-        price * 0.80
+    final case class Item(name: String, price: Int)
+
+    val application = IO.pure(Item("shirts", price = 100))
+      .flatMap(item => IO {
+        item.price * 0.80
       })
       .flatMap(totalPrice => IO {
         0 / 0
@@ -81,19 +79,21 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     result.unsafeRunSync()
   }
 
-  test("effect again") {
+  test("shift effect") {
 
     import cats.effect.IO
 
-    val nonBlockingExecContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
+    val nonBlockingExecContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(
+      Runtime.getRuntime.availableProcessors()
+    ))
 
     val res = for {
       _ <- IO {
-        println(Thread.currentThread().getName)
+        println("thread:" + Thread.currentThread().getName + "-" + Thread.currentThread().getState)
       }
       _ <- IO.shift(nonBlockingExecContext)
       _ <- IO {
-        println(Thread.currentThread().getName)
+        println("thread:" + Thread.currentThread().getName + "-" + Thread.currentThread().getState)
       }
     } yield ()
 
