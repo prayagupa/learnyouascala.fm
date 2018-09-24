@@ -79,6 +79,43 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     result.unsafeRunSync()
   }
 
+  test("cats Resource") {
+
+    import cats.effect.{IO, Resource}
+    import cats.implicits._
+
+    def mkResource(data: String): Resource[IO, String] = {
+      val acquire = IO(println(s"Acquiring $data")) *> IO.pure(data)
+
+      def release(res: String) = IO(println(s"Releasing $res"))
+
+      Resource.make(acquire)(release)
+    }
+
+    val out: Resource[IO, String] = mkResource("outer")
+    val in: Resource[IO, String] = mkResource("inner")
+
+    val rr = out.flatMap { a =>
+      in.flatMap { b =>
+        Resource.pure((a, b))
+      }
+    }
+
+    //    out.map { o =>
+    //      in.map { i =>
+    //        (o, i)
+    //      }
+    //    }
+
+//    val r = for {
+//      outer <- (out)
+//      inner <- (in)
+//    } yield (outer, inner)
+
+    rr.use { case (x, y) => IO(println(s"Using $x and $y")) }.unsafeRunSync
+
+  }
+
   test("shift effect") {
 
     import cats.effect.IO
