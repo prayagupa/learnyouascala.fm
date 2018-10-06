@@ -1,6 +1,6 @@
-name := course.value + "-" + assignment.value
+name := "datastructure-list"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.7"
 
 scalacOptions ++= Seq("-deprecation")
 
@@ -8,7 +8,3 @@ scalacOptions ++= Seq("-deprecation")
 libraryDependencies += "junit" % "junit" % "4.10" % Test
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.12.1"
 
-// include the common dir
-commonSourcePackages += "common"
-
-courseId := "PeZYFz-zEeWB_AoW1KYI4Q"

@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext
 // https://typelevel.org/cats-effect/datatypes/io.html
 class EffectsExampleSpec extends FunSuite with Matchers {
 
-  test("future specs") {
+  test("non blocking futures") {
 
     import scala.concurrent.Future
 
@@ -84,8 +84,8 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     import cats.effect.{IO, Resource}
     import cats.implicits._
 
-    def mkResource(data: String): Resource[IO, String] = {
-      val acquire = IO(println(s"Acquiring $data")) *> IO.pure(data)
+    def mkResource(res: String): Resource[IO, String] = {
+      val acquire = IO(println(s"Acquiring $res")) *> IO.pure(res)
 
       def release(res: String) = IO(println(s"Releasing $res"))
 
@@ -95,25 +95,22 @@ class EffectsExampleSpec extends FunSuite with Matchers {
     val out: Resource[IO, String] = mkResource("outer")
     val in: Resource[IO, String] = mkResource("inner")
 
-    val rr = out.flatMap { a =>
+    val resources = out.flatMap { a =>
       in.flatMap { b =>
         Resource.pure((a, b))
       }
     }
 
-    //    out.map { o =>
-    //      in.map { i =>
-    //        (o, i)
-    //      }
-    //    }
+    val r = for {
+      outer <- out
+      inner <- in
+    } yield (outer, inner)
 
-//    val r = for {
-//      outer <- (out)
-//      inner <- (in)
-//    } yield (outer, inner)
+    val res: String = resources.use { case (r1, r2) =>
+      IO(println(s"Using $r1 and $r2")) *> IO.pure(r1 + "-" + r2)
+    }.unsafeRunSync
 
-    rr.use { case (x, y) => IO(println(s"Using $x and $y")) }.unsafeRunSync
-
+    println(res)
   }
 
   test("shift effect") {

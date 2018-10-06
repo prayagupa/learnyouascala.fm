@@ -1,3 +1,7 @@
+import java.io.File
+import java.util.Base64
+
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 
 /**
@@ -5,7 +9,7 @@ import org.scalatest.{FunSuite, Matchers}
   * on 1/23/17.
   */
 
-class PolySpecs extends FunSuite with Matchers {
+class PolySpecs extends FunSuite with Matchers with MockFactory {
   test("polymorphism") {
     val originalEvent: BaseEvent = SomethingHappened(0, classOf[SomethingHappened].getSimpleName, payload = "{}",
       newField = "apple")

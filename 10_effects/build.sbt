@@ -2,7 +2,8 @@ name := "10_effects"
 
 scalaVersion := "2.12.6"
 
-scalacOptions ++= Seq("-deprecation")
+//https://github.com/scala/scala/pull/5102
+scalacOptions ++= Seq("-deprecation", "-Ypartial-unification")
 
 val CatsVersion = "1.4.0"
 
