@@ -8,6 +8,7 @@ class TypeTagSpecs extends FunSuite with Matchers {
 
     object TypeExtractor {
       def extract[T](list: List[Any]): List[T] = list.flatMap {
+        //TODO warning
         case element: T => Some(element)
         case _ => None
       }

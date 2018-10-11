@@ -5,11 +5,11 @@ class TypeSpecs extends FunSuite with Matchers {
   test("richSeq") {
 
     implicit class RichSeq[T] (val seq: Seq[T]) {
-      def foo = "do something"
+      def fooExtension = "do something"
     }
 
-    Seq(1, 2, 3).foo shouldBe "do something"
-    Seq("hi", "how are you").foo shouldBe "do something"
+    Seq(1, 2, 3).fooExtension shouldBe "do something"
+    Seq("hi", "how are you").fooExtension shouldBe "do something"
 
   }
 
