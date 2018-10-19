@@ -1,3 +1,5 @@
+package datatypes
+
 object SemigroupTypeClasses {
 
   // https://typelevel.org/cats/typeclasses/semigroup.html

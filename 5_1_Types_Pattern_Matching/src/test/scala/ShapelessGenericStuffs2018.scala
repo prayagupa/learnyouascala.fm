@@ -1,3 +1,5 @@
+import shapeless.syntax.SingletonOps
+
 object GenericStuffs2018 {
 
   // https://harrylaou.com/slides/shapeless101.pdf
@@ -93,6 +95,33 @@ object GenericStuffs2018 {
     //// But what happens if we want to use the return type as a type
     //// parameter in a type constructor ???
 
+
+    /////
+    ///// Singleton types
+    /////
+    import shapeless._
+    import syntax.singleton._
+    val dataSingleton = 89.narrow
+
+    /////
+    ///// Witness type
+    /////
+    ///// To get a value from a singleton type.
+    //// With Witness.
+
+    // If we have a witness for a singleton type in scope
+    val wt = Witness(89)
+    println("witness: " + wt)
+    val dataSingleont2: Int = wt.value
+    println("witness value: " + dataSingleont2)
   }
 
+  def x = {
+    val a : Iterable[String] = List("1", "2", "3")
+    a match {
+      case head :: Nil => println("one element")
+      case head :: tail :: Nil => println("two elements")
+      case head :: tail :: Nil => println("two elements")
+    }
+  }
 }

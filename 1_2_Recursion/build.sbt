@@ -1,4 +1,4 @@
-name := course.value + "-" + assignment.value
+name := "recursion-2"
 
 scalaVersion := "2.12.6"
 
@@ -13,65 +13,3 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.26"
 
 libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.2.26"
-
-// include the common dir
-commonSourcePackages += "common"
-
-courseId := "bRPXgjY9EeW6RApRXdjJPw"
-
-// See documentation in ProgFunBuild.scala
-assignmentsMap := {
-  val styleSheetPath = (baseDirectory.value / ".." / ".." / "project" / "scalastyle_config.xml").getPath
-  Map(
-    "example" -> Assignment(
-      packageName = "example",
-      key = "g4unnjZBEeWj7SIAC5PFxA",
-      itemId = "xIz9O",
-      partId = "d5jxI",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "recfun" -> Assignment(
-      packageName = "recfun",
-      key = "SNYuDzZEEeWNVyIAC92BaQ",
-      itemId = "Ey6Jf",
-      partId = "PzVVY",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "funsets" -> Assignment(
-      packageName = "funsets",
-      key = "FNHHMDfsEeWAGiIAC46PTg",
-      itemId = "BVa6a",
-      partId = "IljBE",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "objsets" -> Assignment(
-      packageName = "objsets",
-      key = "6PTXvD99EeWAiCIAC7Pj9w",
-      itemId = "Ogg05",
-      partId = "7hlkb",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath,
-      options = Map("grader-timeout" -> "1800")),
-    "patmat" -> Assignment(
-      packageName = "patmat",
-      key = "BwkTtD9_EeWFZSIACtiVgg",
-      itemId = "uctOq",
-      partId = "2KYZc",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath),
-    "forcomp" -> Assignment(
-      packageName = "forcomp",
-      key = "CPJe397VEeWLGArWOseZkw",
-      itemId = "nVRPb",
-      partId = "v2XIe",
-      maxScore = 10d,
-      styleScoreRatio = 0.2,
-      styleSheet = styleSheetPath,
-      options = Map("grader-timeout" -> "1800"))
-  )
-}
